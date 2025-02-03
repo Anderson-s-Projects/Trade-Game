@@ -1,98 +1,103 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Stock Wars Trading Game</title>
+  <!-- External Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    /* Windows 95 and Grid UI Styles */
+    /* Retro UI Styles (Inspired by early computer interfaces) */
     body {
-      font-family: 'MS Sans Serif', 'Microsoft Sans Serif', sans-serif;
-      background: #c0c0c0;
-      margin: 8px;
+      font-family: monospace;
+      background-color: #000;
+      color: #15d115;
+      margin: 0;
       padding: 0;
+      overflow: hidden;
     }
-    button, input, select {
-      font-family: 'MS Sans Serif', sans-serif;
-      font-size: 12px;
-      background: #c0c0c0;
-      border: 2px solid;
-      border-color: #ffffff #808080 #808080 #ffffff;
-      padding: 4px 8px;
-      margin: 2px;
-    }
-    button:active {
-      border-color: #808080 #ffffff #ffffff #808080;
+    .game-container {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      grid-gap: 4px;
+      height: 100vh;
+      padding: 4px;
     }
     .window {
-      border: 2px solid;
-      border-color: #ffffff #808080 #808080 #ffffff;
-      background: #c0c0c0;
-      padding: 2px;
-      margin-bottom: 8px;
+      border: 2px inset #aaaaaa;
+      background-color: #222222;
+      padding: 4px;
+      margin-bottom: 4px;
+      overflow: hidden;
     }
     .window-title {
-      background: #000080;
-      color: white;
+      background-color: #444444;
+      color: #00ff00;
       padding: 2px;
       font-weight: bold;
       font-size: 12px;
+      text-align: center;
+      border-bottom: 1px solid #00ff00;
     }
     .menu-bar {
-      background: #c0c0c0;
-      border-bottom: 1px solid #808080;
+      background-color: #222222;
       padding: 2px;
       margin-bottom: 4px;
+      display: flex;
+      gap: 2px;
     }
+    /* Menu buttons now use the native <button> element */
     .menu-item {
-      display: inline-block;
+      color: #03d503;
       padding: 2px 8px;
       cursor: pointer;
+      border: 1px outset #aaaaaa;
+      background: transparent;
+      font-family: monospace;
+      font-size: 10px;
     }
     .menu-item:hover {
-      background: #000080;
-      color: white;
+      background-color: #444444;
     }
     table {
       width: 100%;
       border-collapse: collapse;
+      table-layout: fixed;
     }
     th, td {
-      border: 1px solid #808080;
-      padding: 4px;
-      font-size: 12px;
-      background: white;
+      border: 1px solid #00ff00;
+      padding: 2px;
+      font-size: 10px;
+      background-color: #111111;
+      text-align: left;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
     th {
-      background: #c0c0c0;
-      text-align: left;
+      background-color: #333333;
+      color: #00ff00;
     }
     .player-stats {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 4px;
     }
     .player-info {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .player-info label {
-      margin: 0;
-    }
     .health-bar-container {
       width: 100%;
+      border: 1px solid #00ff00;
+      height: 12px;
+      background-color: #111111;
+      overflow: hidden;
     }
     .health-bar {
-      width: 100%;
-      height: 16px;
-      border: 2px solid;
-      border-color: #808080 #ffffff #ffffff #808080;
-      background: white;
-    }
-    .health-fill {
       height: 100%;
-      background: #000080;
       width: 100%;
+      background-color: #00ff00;
     }
     .portfolio-section {
       width: 100%;
@@ -106,44 +111,44 @@
     #event-content {
       height: 150px;
       overflow-y: auto;
-      background: white;
+      background-color: #111111;
       padding: 4px;
-      font-size: 12px;
+      font-size: 10px;
+      color: #00ff00;
+      border: 1px solid #00ff00;
     }
-    /* Modal windows for File, Settings, Help, Price History, and Game Over */
+    /* Modal windows */
     .modal {
       display: none;
       position: absolute;
-      background: #c0c0c0;
+      background-color: #222222;
       padding: 8px;
-      border: 2px solid #808080;
+      border: 2px outset #aaaaaa;
       z-index: 1000;
       opacity: 0;
       transition: opacity 0.3s ease;
+      color: #00ff00;
     }
     .modal.show {
       display: block;
       opacity: 1;
     }
-    /* Grid Layout for the game area */
-    .game-container {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      grid-gap: 8px;
+    .modal .window-title {
+      border-bottom: 1px solid #00ff00;
     }
     .player-market-area, .event-log-area, .locations-area {
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
     .control-panel {
       margin-top: 4px;
+      display: flex;
+      gap: 4px;
     }
-    /* Responsive Design for smaller viewports */
     @media (max-width: 600px) {
       .game-container {
         grid-template-columns: 1fr;
       }
     }
-    /* Highlight invalid input briefly */
     .input-error {
       border-color: red !important;
       animation: shake 0.3s;
@@ -155,9 +160,66 @@
       75% { transform: translateX(-4px); }
       100% { transform: translateX(0); }
     }
+    button, input, select {
+      font-family: monospace;
+      font-size: 10px;
+      background-color: #333333;
+      color: #00ff00;
+      border: 2px outset #aaaaaa;
+      padding: 2px 4px;
+      margin: 2px;
+    }
+    button:active {
+      border: 2px inset #aaaaaa;
+    }
+    input[type="number"] {
+      width: 50px;
+    }
+    #start-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #start-overlay button {
+      font-size: 2em;
+      padding: 20px 40px;
+      background: #222;
+      border: 3px outset #0f0;
+      color: #0f0;
+      cursor: pointer;
+    }
+    .portfolio-summary {
+      padding: 5px;
+      border: 1px solid #0f0;
+      margin: 5px 0;
+      background: #111;
+    }
+    .stock-price-change {
+      animation: priceChange 1s forwards;
+      opacity: 0;
+    }
+    @keyframes priceChange {
+      0% { transform: translateY(0); opacity: 1; }
+      50% { transform: translateY(-10px); opacity: 0.5; }
+      100% { transform: translateY(10px); opacity: 0; }
+    }
+    #history-chart {
+      width: 380px;
+      height: 180px;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Start Overlay -->
+  <div id="start-overlay">
+    <button onclick="startGame()">START TRADING</button>
+  </div>
+
   <!-- File Menu Modal -->
   <div id="file-menu" class="modal" style="top:20%; left:40%;">
     <div class="window-title">File Menu</div>
@@ -184,7 +246,6 @@
         Sound Effects
       </label>
     </div>
-    <!-- New Audio Settings: Music Volume -->
     <div>
       <label for="music-volume">Music Volume:</label>
       <input type="range" id="music-volume" min="0" max="1" step="0.1" value="0.5" onchange="updateMusicVolume(this.value)">
@@ -226,7 +287,9 @@
   <!-- Price History Modal -->
   <div id="history-window" class="modal" style="top:20%; left:30%; width:400px;">
     <div class="window-title">Price History for <span id="history-stock"></span></div>
-    <div id="history-content" style="background:white; padding:4px; font-size:12px; max-height:200px; overflow-y:auto;"></div>
+    <div id="history-chart">
+      <canvas id="priceChart"></canvas>
+    </div>
     <button onclick="closePriceHistory()">Close</button>
   </div>
 
@@ -247,9 +310,10 @@
         Stock Wars - Day <span id="current-day">1</span>/30
       </div>
       <div class="menu-bar">
-        <span class="menu-item" onclick="openModal('file-menu')">File</span>
-        <span class="menu-item" onclick="openModal('settings-menu')">Settings</span>
-        <span class="menu-item" onclick="openModal('help-menu')">Help</span>
+        <!-- Using native <button> elements for interactive menu items -->
+        <button type="button" class="menu-item" onclick="openModal('file-menu')">File</button>
+        <button type="button" class="menu-item" onclick="openModal('settings-menu')">Settings</button>
+        <button type="button" class="menu-item" onclick="openModal('help-menu')">Help</button>
       </div>
     </div>
 
@@ -259,17 +323,15 @@
         <div class="window-title">Player Stats</div>
         <div class="player-stats">
           <div class="player-info">
-            <label>Cash: $<span id="cash">2000</span></label>
-            <label>Debt: $<span id="debt">5000</span></label>
-            <label>Health: <span id="health">100</span>%</label>
+            <label for="cash">Cash: $<span id="cash">2000</span></label>
+            <label for="debt">Debt: $<span id="debt">5000</span></label>
+            <label for="health">Health: <span id="health">100</span>%</label>
           </div>
           <div class="player-info">
-            <label>Margin Available: $<span id="margin">0</span></label>
+            <label for="margin">Margin Available: $<span id="margin">0</span></label>
           </div>
           <div class="health-bar-container">
-            <div class="health-bar">
-              <div class="health-fill" id="health-fill"></div>
-            </div>
+            <div class="health-bar" id="health-fill"></div>
           </div>
           <div class="portfolio-section">
             <div class="window-title">Portfolio</div>
@@ -339,12 +401,10 @@
   </div>
 
   <!-- Audio Elements -->
-  <!-- Background Music (replace 'background.mp3' with your own file) -->
   <audio id="background-music" loop>
     <source src="background.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
-  <!-- Sound Effects -->
   <audio id="buy-sound">
     <source src="buy.mp3" type="audio/mpeg">
   </audio>
@@ -361,53 +421,73 @@
     <source src="news.mp3" type="audio/mpeg">
   </audio>
 
+  <!-- JavaScript Code -->
   <script>
-    /***** Global Settings *****/
-    let gameSettings = {
+    /***** Global Settings & Initial State *****/
+    const gameSettings = {
       difficulty: "normal",
       sound: true,
       feeEnabled: false,
-      musicVolume: 0.5  // New setting for background music volume
+      musicVolume: 0.5
     };
 
-    /***** Game State *****/
     let state = {
       cash: 2000,
       debt: 5000,
       health: 100,
-      inventory: {},         // Long positions: { stock: quantity }
-      shortPositions: {},    // Short positions: { stock: quantity }
-      marketPrices: {},      // Current prices for each stock
-      priceHistory: {},      // Price history for each stock (array of prices)
+      inventory: {},
+      shortPositions: {},
+      marketPrices: {},
+      priceHistory: {},
       location: 0,
       day: 1,
-      globalTrend: 0         // A multiplier applied to base prices (-0.1 to +0.1)
+      globalTrend: 0
     };
-    let isGameOver = false; // New flag to disable further actions
 
-    // Stock list (companies or sectors) and locations
+    let isGameOver = false;
+
+    // Stocks and Locations
     const stocks = ["Tech", "Food", "Medicine", "Clothing", "Luxury Goods", "Metals", "Oil", "Weapons"];
     const locations = ["New York", "London", "Tokyo", "Dubai", "Shanghai", "Berlin", "São Paulo", "Sydney"];
 
-    /***** Audio Setup *****/
-    const backgroundMusic = document.getElementById("background-music");
-    backgroundMusic.volume = gameSettings.musicVolume;
-    backgroundMusic.play().catch(e => {
-      // Autoplay may be blocked; consider starting on user interaction.
-      console.log("Background music autoplay blocked.");
-    });
-    // Create helper function for playing sound effects.
-    function playSound(id) {
-      if (!gameSettings.sound) return;
-      const sound = document.getElementById(id);
-      if (sound) {
-        sound.currentTime = 0;
-        sound.play();
+    // Economy settings and update function
+    const economy = {
+      inflation: 0.02,
+      interestRate: 0.05,
+      update() {
+        if (state.day % 7 === 0) {
+          this.inflation += (Math.random() * 0.01 - 0.005);
+          this.interestRate = Math.min(0.15, this.inflation + 0.03);
+          logEvent(`Federal Reserve adjusts rates to ${(this.interestRate * 100).toFixed(1)}%`);
+        }
+      }
+    };
+
+    /***** Audio Controller *****/
+    class AudioController {
+      constructor() {
+        this.backgroundMusic = document.getElementById('background-music');
+        this.soundEnabled = true;
+      }
+      play(id) {
+        if (!this.soundEnabled) return;
+        const sound = document.getElementById(id);
+        if (sound) {
+          sound.currentTime = 0;
+          sound.play().catch(e => console.error('Audio error:', e));
+        }
+      }
+      setMusicVolume(volume) {
+        this.backgroundMusic.volume = volume;
       }
     }
+    const audioController = new AudioController();
 
-    /***** Helper Functions *****/
-    // Utility to open modals with a fade effect.
+    // Set up background music volume and attempt autoplay
+    audioController.backgroundMusic.volume = gameSettings.musicVolume;
+    audioController.backgroundMusic.play().catch(e => console.log("Background music autoplay blocked."));
+
+    /***** Modal Helper Functions *****/
     function openModal(id) {
       document.getElementById(id).classList.add("show");
     }
@@ -415,9 +495,8 @@
       document.getElementById(id).classList.remove("show");
     }
 
-    // Generate a global market trend for the day (affects all stocks)
+    /***** Market & UI Functions *****/
     function generateMarketTrend() {
-      // Trend between -10% (bearish) and +10% (bullish)
       state.globalTrend = (Math.random() * 0.2) - 0.1;
       const trendDisplay = document.getElementById("market-trend");
       if (state.globalTrend > 0.03) {
@@ -429,16 +508,14 @@
       }
     }
 
-    // Generate market prices for each stock using a base price and global trend.
     function generateMarketPrices() {
       generateMarketTrend();
       stocks.forEach(stock => {
-        let basePrice = Math.floor(Math.random() * 400 + 200);  // Base price between $200 and $600
-        let fluctuation = (Math.random() * 0.4) - 0.2;           // Individual fluctuation: -20% to +20%
+        const basePrice = Math.floor(Math.random() * 400 + 200);
+        const fluctuation = (Math.random() * 0.4) - 0.2;
         let newPrice = Math.floor(basePrice * (1 + state.globalTrend + fluctuation));
         newPrice = Math.max(50, Math.min(1000, newPrice));
         state.marketPrices[stock] = newPrice;
-        // Append the price to price history
         if (!state.priceHistory[stock]) {
           state.priceHistory[stock] = [];
         }
@@ -447,7 +524,6 @@
       renderMarket();
     }
 
-    // Render the market table and item selection dropdown.
     function renderMarket() {
       const priceTable = document.getElementById("price-table");
       const itemSelect = document.getElementById("item-select");
@@ -459,7 +535,6 @@
         const priceCell = row.insertCell();
         stockCell.textContent = stock;
         priceCell.textContent = `$${state.marketPrices[stock]}`;
-        // Add to dropdown
         const option = document.createElement("option");
         option.value = stock;
         option.text = stock;
@@ -467,7 +542,6 @@
       });
     }
 
-    // Render the player's portfolio table (both long and short positions).
     function renderPortfolio() {
       const portfolioTable = document.getElementById("portfolio-table");
       portfolioTable.innerHTML = "<tr><th>Stock</th><th>Long</th><th>Short</th></tr>";
@@ -483,7 +557,16 @@
       });
     }
 
-    // Log events with a timestamp.
+    function updateUI() {
+      document.getElementById("cash").innerText = state.cash;
+      document.getElementById("debt").innerText = state.debt;
+      document.getElementById("health").innerText = state.health;
+      document.getElementById("current-day").innerText = state.day;
+      document.getElementById("health-fill").style.width = `${state.health}%`;
+      const margin = Math.floor(state.cash * 0.2);
+      document.getElementById("margin").innerText = margin;
+    }
+
     function logEvent(message) {
       const eventLog = document.getElementById("event-content");
       const timestamp = new Date().toLocaleTimeString();
@@ -492,30 +575,15 @@
       renderPortfolio();
     }
 
-    // Update UI elements to reflect current state.
-    function updateUI() {
-      document.getElementById("cash").innerText = state.cash;
-      document.getElementById("debt").innerText = state.debt;
-      document.getElementById("health").innerText = state.health;
-      document.getElementById("current-day").innerText = state.day;
-      // Update health bar width based on health percentage:
-      document.getElementById("health-fill").style.width = `${state.health}%`;
-      // Calculate margin available (for simplicity, margin = 20% of cash):
-      let margin = Math.floor(state.cash * 0.2);
-      document.getElementById("margin").innerText = margin;
-    }
-
     /***** Trading Functions *****/
-    // Helper function to briefly highlight an invalid input.
     function markInvalid(id) {
       const el = document.getElementById(id);
       el.classList.add("input-error");
       setTimeout(() => el.classList.remove("input-error"), 300);
     }
 
-    // Buy stock (go long)
     function buyItem() {
-      if(isGameOver) return;
+      if (isGameOver) return;
       const quantity = parseInt(document.getElementById("buy-quantity").value);
       if (isNaN(quantity) || quantity <= 0) {
         logEvent("Enter a valid buy quantity.");
@@ -524,21 +592,20 @@
       }
       const stock = document.getElementById("item-select").value;
       let cost = state.marketPrices[stock] * quantity;
-      if (gameSettings.feeEnabled) cost += 10; // Apply flat fee if enabled
+      if (gameSettings.feeEnabled) cost += 10;
       if (state.cash >= cost) {
         state.cash -= cost;
         state.inventory[stock] = (state.inventory[stock] || 0) + quantity;
         logEvent(`Bought ${quantity} shares of ${stock} for $${cost}.`);
-        playSound("buy-sound");
+        audioController.play("buy-sound");
       } else {
         logEvent("Not enough cash to buy.");
       }
       updateUI();
     }
 
-    // Sell stock (liquidate long position)
     function sellItem() {
-      if(isGameOver) return;
+      if (isGameOver) return;
       const quantity = parseInt(document.getElementById("sell-quantity").value);
       if (isNaN(quantity) || quantity <= 0) {
         logEvent("Enter a valid sell quantity.");
@@ -551,18 +618,17 @@
         return;
       }
       let revenue = state.marketPrices[stock] * quantity;
-      if (gameSettings.feeEnabled) revenue -= 10; // Subtract fee if enabled
+      if (gameSettings.feeEnabled) revenue -= 10;
       state.cash += revenue;
       state.inventory[stock] -= quantity;
       if (state.inventory[stock] === 0) delete state.inventory[stock];
       logEvent(`Sold ${quantity} shares of ${stock} for $${revenue}.`);
-      playSound("sell-sound");
+      audioController.play("sell-sound");
       updateUI();
     }
 
-    // Short sell: borrow shares to sell now hoping to buy them back later at a lower price.
     function shortSell() {
-      if(isGameOver) return;
+      if (isGameOver) return;
       const quantity = parseInt(document.getElementById("short-quantity").value);
       if (isNaN(quantity) || quantity <= 0) {
         logEvent("Enter a valid short sell quantity.");
@@ -572,13 +638,12 @@
       const stock = document.getElementById("item-select").value;
       state.shortPositions[stock] = (state.shortPositions[stock] || 0) + quantity;
       logEvent(`Short sold ${quantity} shares of ${stock} at $${state.marketPrices[stock]} each.`);
-      playSound("short-sound");
+      audioController.play("short-sound");
       updateUI();
     }
 
-    // Cover short: buy back shares to close your short position.
     function coverShort() {
-      if(isGameOver) return;
+      if (isGameOver) return;
       const quantity = parseInt(document.getElementById("cover-quantity").value);
       if (isNaN(quantity) || quantity <= 0) {
         logEvent("Enter a valid cover quantity.");
@@ -599,20 +664,21 @@
       state.shortPositions[stock] -= quantity;
       if (state.shortPositions[stock] === 0) delete state.shortPositions[stock];
       logEvent(`Covered ${quantity} short shares of ${stock} for $${cost}.`);
-      playSound("cover-sound");
+      audioController.play("cover-sound");
       updateUI();
     }
 
-    // Margin trading: Take a loan to increase cash.
+    // Merged Loan Functions
     function takeLoan() {
-      if(isGameOver) return;
+      if (isGameOver) return;
+      const amountWithInterest = 1000 * (1 + economy.interestRate);
+      state.debt += amountWithInterest;
       state.cash += 1000;
-      state.debt += 1000;
-      logEvent("Took a $1000 loan.");
+      logEvent(`Took a $1000 loan (Total repayment: $${amountWithInterest.toFixed(2)}).`);
       updateUI();
     }
     function repayLoan() {
-      if(isGameOver) return;
+      if (isGameOver) return;
       if (state.cash < 1000) {
         logEvent("Not enough cash to repay loan.");
         return;
@@ -623,9 +689,9 @@
       updateUI();
     }
 
-    /***** Daily Events and Turn Progression *****/
+    /***** Daily Events & Turn Progression *****/
     function travel(destinationIndex) {
-      if(isGameOver) return;
+      if (isGameOver) return;
       if (destinationIndex === state.location) {
         logEvent("You're already in this location.");
         return;
@@ -636,31 +702,29 @@
       nextTurn();
     }
 
-    // Trigger a random news event that can affect the market or individual stocks.
     function triggerNewsEvent() {
       const eventChance = Math.random();
       if (eventChance < 0.15) {
         const stock = stocks[Math.floor(Math.random() * stocks.length)];
         logEvent(`News Flash: ${stock} scandal rocks the market! Prices drop.`);
         state.marketPrices[stock] = Math.floor(state.marketPrices[stock] * 0.8);
-        playSound("news-sound");
+        audioController.play("news-sound");
       } else if (eventChance < 0.3) {
         logEvent("Breaking News: New government policies boost market confidence!");
         stocks.forEach(stock => state.marketPrices[stock] = Math.floor(state.marketPrices[stock] * 1.1));
-        playSound("news-sound");
+        audioController.play("news-sound");
       } else if (eventChance < 0.35) {
         logEvent("Market Rumor: Insider tip causes a surge in tech stocks.");
         const stock = "Tech";
         state.marketPrices[stock] = Math.floor(state.marketPrices[stock] * 1.2);
-        playSound("news-sound");
+        audioController.play("news-sound");
       } else {
         logEvent("No major news today.");
       }
     }
 
-    // Proceed to the next day.
     function nextTurn() {
-      if(isGameOver) return;
+      if (isGameOver) return;
       state.day++;
       if (state.day > 30) {
         endGame();
@@ -672,7 +736,6 @@
       logEvent(`Cash: $${state.cash} | Debt: $${state.debt} | Health: ${state.health}%`);
     }
 
-    // End game: Calculate final score, disable controls, and show Game Over modal.
     function endGame() {
       isGameOver = true;
       const finalScore = state.cash - state.debt;
@@ -684,7 +747,6 @@
       disableTradingControls();
     }
 
-    // Disable all trading control buttons after game end.
     function disableTradingControls() {
       const controls = ["buy-btn", "sell-btn", "short-btn", "cover-btn", "loan-btn", "repay-btn"];
       controls.forEach(id => {
@@ -692,26 +754,43 @@
       });
     }
 
-    // Close the Game Over modal.
     function closeGameOver() {
       closeModal("gameover-modal");
     }
 
-    /***** Price History Modal *****/
+    /***** Price History Modal (with Chart.js) *****/
     function showPriceHistory() {
       const stock = document.getElementById("item-select").value;
       document.getElementById("history-stock").textContent = stock;
-      const historyContent = document.getElementById("history-content");
-      historyContent.innerHTML = "";
-      if (state.priceHistory[stock]) {
-        state.priceHistory[stock].forEach((price, index) => {
-          historyContent.innerHTML += `<p>Day ${index + 1}: $${price}</p>`;
-        });
-      } else {
-        historyContent.innerHTML = "<p>No history available.</p>";
+      const history = state.priceHistory[stock];
+      if (game.chart) {
+        game.chart.destroy();
       }
+      const ctx = document.getElementById('priceChart').getContext('2d');
+      game.chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: history.map((_, i) => `Day ${i + 1}`),
+          datasets: [{
+            label: `${stock} Price`,
+            data: history,
+            borderColor: '#0f0',
+            tension: 0.1
+          }]
+        },
+        options: {
+          plugins: {
+            legend: { labels: { color: '#0f0' } }
+          },
+          scales: {
+            y: { ticks: { color: '#0f0' } },
+            x: { ticks: { color: '#0f0' } }
+          }
+        }
+      });
       openModal("history-window");
     }
+
     function closePriceHistory() {
       closeModal("history-window");
     }
@@ -732,24 +811,24 @@
           globalTrend: 0
         };
         isGameOver = false;
-        // Reinitialize price history arrays for each stock.
         stocks.forEach(stock => state.priceHistory[stock] = []);
         generateMarketPrices();
         updateUI();
         renderPortfolio();
         logEvent("Started a new game.");
         closeModal("file-menu");
-        // Re-enable trading controls
         const controls = ["buy-btn", "sell-btn", "short-btn", "cover-btn", "loan-btn", "repay-btn"];
         controls.forEach(id => {
           document.getElementById(id).disabled = false;
         });
       }
     }
+
     function saveGame() {
       localStorage.setItem("stockWarsSave", JSON.stringify(state));
       logEvent("Game saved.");
     }
+
     function loadGame() {
       const savedState = localStorage.getItem("stockWarsSave");
       if (savedState) {
@@ -762,6 +841,7 @@
         logEvent("No saved game found.");
       }
     }
+
     function closeFileMenu() {
       closeModal("file-menu");
     }
@@ -770,28 +850,29 @@
     function updateDifficulty(level) {
       gameSettings.difficulty = level;
       logEvent(`Difficulty set to ${level}.`);
-      // Optionally adjust game parameters based on difficulty.
     }
+
     function toggleSound(enabled) {
       gameSettings.sound = enabled;
       logEvent(`Sound effects ${enabled ? "enabled" : "disabled"}.`);
-      // If sound is disabled, you might pause background music:
       if (!enabled) {
-        backgroundMusic.pause();
+        audioController.backgroundMusic.pause();
       } else {
-        backgroundMusic.play();
+        audioController.backgroundMusic.play();
       }
     }
+
     function toggleFee(enabled) {
       gameSettings.feeEnabled = enabled;
       logEvent(`Transaction fee ${enabled ? "enabled" : "disabled"}.`);
     }
-    // New function to update background music volume
+
     function updateMusicVolume(volume) {
       gameSettings.musicVolume = parseFloat(volume);
-      backgroundMusic.volume = gameSettings.musicVolume;
+      audioController.setMusicVolume(gameSettings.musicVolume);
       logEvent(`Music volume set to ${gameSettings.musicVolume}.`);
     }
+
     function closeSettingsMenu() {
       closeModal("settings-menu");
     }
@@ -801,13 +882,53 @@
       closeModal("help-menu");
     }
 
-    /***** Initialize Game *****/
-    stocks.forEach(stock => {
-      state.priceHistory[stock] = [];
-    });
-    generateMarketPrices();
-    updateUI();
-    renderPortfolio();
+    /***** Game Manager Object *****/
+    const game = {
+      state: state,
+      economy: economy,
+      audio: audioController,
+      stocks: stocks,
+      locations: locations,
+      isGameOver: isGameOver,
+      chart: null,
+      init() {
+        // Initialize price history arrays
+        this.stocks.forEach(stock => {
+          state.priceHistory[stock] = [];
+        });
+        this.setupEventHandlers();
+        generateMarketPrices();
+        updateUI();
+        renderPortfolio();
+      },
+      setupEventHandlers() {
+        document.addEventListener('click', e => {
+          if (e.target.matches('#buy-btn')) buyItem();
+          if (e.target.matches('#sell-btn')) sellItem();
+          if (e.target.matches('#short-btn')) shortSell();
+          if (e.target.matches('#cover-btn')) coverShort();
+          if (e.target.matches('#loan-btn')) takeLoan();
+          if (e.target.matches('#repay-btn')) repayLoan();
+        });
+      },
+      nextTurn() {
+        if (this.isGameOver) return;
+        state.debt *= 1 + this.economy.interestRate;
+        if (state.debt > state.cash * 5) {
+          logEvent("Margin Call! Liquidating assets...");
+          // Forced selling logic can be implemented here
+        }
+      }
+    };
+
+    /***** Game Start Function *****/
+    function startGame() {
+      document.getElementById('start-overlay').remove();
+      game.init();
+      audioController.backgroundMusic.play().catch(e => console.log('Autoplay blocked'));
+    }
+
+    // Optionally, you may remove any empty or unused event listeners.
   </script>
 </body>
 </html>
