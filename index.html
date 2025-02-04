@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
    <head>
+    
       <meta charset="UTF-8">
       <title>Stock Wars Trading Game</title>
       <!-- External Libraries -->
@@ -579,38 +580,61 @@
          }
 
          function renderMarket() {
-            const priceTable = document.getElementById("price-table");
-            const itemSelect = document.getElementById("item-select");
-            priceTable.innerHTML = " < tr > < th > Stock < /th> < th > Price < /th> < /tr>";
-            itemSelect.innerHTML = "";
-            stocks.forEach(stock => {
-               const row = priceTable.insertRow();
-               const stockCell = row.insertCell();
-               const priceCell = row.insertCell();
-               stockCell.textContent = stock;
-               priceCell.textContent = `$${state.marketPrices[stock]}`;
-               const option = document.createElement("option");
-               option.value = stock;
-               option.text = stock;
-               itemSelect.appendChild(option);
-            });
-         }
+  const priceTable = document.getElementById("price-table");
+  const itemSelect = document.getElementById("item-select");
 
+  // Clear table content (important!)
+  priceTable.innerHTML = ""; // Clear the table content first
+
+  // Create table header row (using DOM methods)
+  const headerRow = priceTable.insertRow();
+  headerRow.insertCell().textContent = "Stock";
+  headerRow.insertCell().textContent = "Price";
+
+  // Populate table with data
+  stocks.forEach(stock => {
+    const row = priceTable.insertRow();
+    const stockCell = row.insertCell();
+    const priceCell = row.insertCell();
+
+    stockCell.textContent = stock;
+    priceCell.textContent = `$${state.marketPrices[stock]}`;
+  });
+
+  // Populate item select dropdown (more efficient)
+  itemSelect.innerHTML = ""; // Clear existing options
+  stocks.forEach(stock => {
+    const option = document.createElement("option");
+    option.value = stock;
+    option.text = stock;
+    itemSelect.appendChild(option);
+  });
+}
          function renderPortfolio() {
-            const portfolioTable = document.getElementById("portfolio-table");
-            portfolioTable.innerHTML = " < tr > < th > Stock < /th> < th > Long < /th> < th > Short < /th> < /tr>";
-            stocks.forEach(stock => {
-               const longQty = state.inventory[stock] || 0;
-               const shortQty = state.shortPositions[stock] || 0;
-               if (longQty || shortQty) {
-                  const row = portfolioTable.insertRow();
-                  row.insertCell().textContent = stock;
-                  row.insertCell().textContent = longQty;
-                  row.insertCell().textContent = shortQty;
-               }
-            });
-         }
+  const portfolioTable = document.getElementById("portfolio-table");
 
+  // More robust: Clear the table content first
+  portfolioTable.innerHTML = "";
+
+  // Create the header row (using DOM methods - better practice)
+  const headerRow = portfolioTable.insertRow();
+  headerRow.insertCell().textContent = "Stock";
+  headerRow.insertCell().textContent = "Long";
+  headerRow.insertCell().textContent = "Short";
+
+  // Populate the table with data
+  stocks.forEach(stock => {
+    const longQty = state.inventory[stock] || 0;
+    const shortQty = state.shortPositions[stock] || 0;
+
+    if (longQty || shortQty) {
+      const row = portfolioTable.insertRow();
+      row.insertCell().textContent = stock;
+      row.insertCell().textContent = longQty;
+      row.insertCell().textContent = shortQty;
+    }
+  });
+}
          function updateUI() {
             document.getElementById("cash").innerText = state.cash;
             document.getElementById("debt").innerText = state.debt;
