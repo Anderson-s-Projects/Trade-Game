@@ -1,296 +1,317 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>Stock Wars Trading Game</title>  <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      
-        <meta name="description" content="Become a market mogul in Stock Wars! Trade stocks, manage your portfolio, and navigate market trends in this retro-styled trading game."> <meta name="keywords" content="stock market, trading game, simulation, finance, retro game, online game, portfolio management, investing"> <meta name="author" content="Your Name"> <meta property="og:title" content="Stock Wars Trading Game">
-        <meta property="og:description" content="Become a market mogul in Stock Wars! Trade stocks, manage your portfolio, and navigate market trends in this retro-styled trading game.">
-        <meta property="og:url" content="https://your-website-url.com"> <meta property="og:image" content="https://your-website-url.com/images/thumbnail.png"> <meta property="og:type" content="website">  <meta name="twitter:card" content="summary_large_image">  <meta name="twitter:title" content="Stock Wars Trading Game">
-        <meta name="twitter:description" content="Become a market mogul in Stock Wars! Trade stocks, manage your portfolio, and navigate market trends in this retro-styled trading game.">
-        <meta name="twitter:image" content="https://your-website-url.com/images/thumbnail.png">
-      
-        <link rel="icon" href="/favicon.ico" type="image/x-icon">  </head>
-      <!-- External Libraries -->
-      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<head>
+    <title>Stock Wars Trading Game</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <meta name="description" content="Become a market mogul in Stock Wars! Trade stocks, manage your portfolio, and navigate market trends in this retro-styled trading game.">
+    <meta name="keywords" content="stock market, trading game, simulation, finance, retro game, online game, portfolio management, investing">
+    <meta name="author" content="Your Name">
+
+    <meta property="og:title" content="Stock Wars Trading Game">
+    <meta property="og:description" content="Become a market mogul in Stock Wars! Trade stocks, manage your portfolio, and navigate market trends in this retro-styled trading game.">
+    <meta property="og:url" content="https://your-website-url.com">
+    <meta property="og:image" content="https://your-website-url.com/images/thumbnail.png">
+    <meta property="og:type" content="website">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Stock Wars Trading Game">
+    <meta name="twitter:description" content="Become a market mogul in Stock Wars! Trade stocks, manage your portfolio, and navigate market trends in this retro-styled trading game.">
+    <meta name="twitter:image" content="https://your-website-url.com/images/thumbnail.png">
+
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  </head>
+<body>
+
+</body>
+</html>
 
       <style>
-
-#game-area {
-    width: auto;
-    height: 90vh; /* Height will adjust to maintain aspect ratio */
-    aspect-ratio: 16/9; /* Maintain a 16:9 aspect ratio */
+/* General Styles */
+body {
+    font-family: monospace;
+    background-color: #000;
+    color: #15d115;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* Prevent horizontal scroll on some mobile devices */
+    box-sizing: border-box; /* Include padding and border in element size */
 }
 
-         /* Retro UI Styles (Inspired by early computer interfaces) */
-         body {
-            font-family: monospace;
-            background-color: #000;
-            color: #15d115;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-         }
+/* Game Container */
+.game-container {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* Default layout (larger screens) */
+    grid-gap: 4px;
+    padding: 4px;
+    box-sizing: border-box;
+}
 
+/* Game Area */
+#game-area {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16/9; /* Or your game's aspect ratio */
+    max-width: 100%; /* Prevent overflow */
+    background-color: #111; /* Example background for the game area */
+}
 
-         .window {
-            border: 2px inset #aaaaaa;
-            background-color: #222222;
-            padding: 4px;
-            margin-bottom: 4px;
-            overflow: hidden;
-         }
+/* Window Styles */
+.window {
+    border: 2px inset #aaaaaa;
+    background-color: #222222;
+    padding: 4px;
+    margin-bottom: 4px;
+    overflow: hidden; /* Keep content within the window */
+    box-sizing: border-box;
+}
 
-         .window-title {
-            background-color: #444444;
-            color: #00ff00;
-            padding: 2px;
-            font-weight: bold;
-            font-size: 12px;
-            text-align: center;
-            border-bottom: 1px solid #00ff00;
-         }
+.window-title {
+    background-color: #444444;
+    color: #00ff00;
+    padding: 2px;
+    font-weight: bold;
+    font-size: 12px;
+    text-align: center;
+    border-bottom: 1px solid #00ff00;
+}
 
-         .menu-bar {
-            background-color: #222222;
-            padding: 2px;
-            margin-bottom: 4px;
-            display: flex;
-            gap: 2px;
-         }
+/* Menu Bar */
+.menu-bar {
+    background-color: #222222;
+    padding: 2px;
+    margin-bottom: 4px;
+    display: flex;
+    gap: 2px;
+}
 
-         /* Menu buttons now use the native 
-				<button> element */
-         .menu-item {
-            color: #03d503;
-            padding: 2px 8px;
-            cursor: pointer;
-            border: 1px outset #aaaaaa;
-            background: transparent;
-            font-family: monospace;
-            font-size: 10px;
-         }
+.menu-item {
+    color: #03d503;
+    padding: 2px 8px;
+    cursor: pointer;
+    border: 1px outset #aaaaaa;
+    background: transparent;
+    font-family: monospace;
+    font-size: 10px;
+}
 
-         .menu-item:hover {
-            background-color: #444444;
-         }
+.menu-item:hover {
+    background-color: #444444;
+}
 
-         table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-         }
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Important for consistent table layout */
+}
 
-         th,
-         td {
-            border: 1px solid #00ff00;
-            padding: 2px;
-            font-size: 10px;
-            background-color: #111111;
-            text-align: left;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-         }
+th, td {
+    border: 1px solid #00ff00;
+    padding: 2px;
+    font-size: 10px;
+    background-color: #111111;
+    text-align: left; /* Default left alignment */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
 
-         th {
-            background-color: #333333;
-            color: #00ff00;
-         }
+th {
+    background-color: #333333;
+    color: #00ff00;
+    text-align: left;
+}
 
-         .player-stats {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-         }
+/* Player Stats */
+.player-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px;
+    box-sizing: border-box; /* Include padding in width */
+}
 
-         .player-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-         }
+.player-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+}
 
-         .health-bar-container {
-            width: 100%;
-            border: 1px solid #00ff00;
-            height: 12px;
-            background-color: #111111;
-            overflow: hidden;
-         }
+.health-bar-container {
+    width: 100%;
+    border: 1px solid #00ff00;
+    height: 12px;
+    background-color: #111111;
+    overflow: hidden;
+}
 
-         .health-bar {
-            height: 100%;
-            width: 100%;
-            background: linear-gradient(to right, #ff1e00, #00ff00);
-            /* Green to Yellow */
-            background-color: #00FF00;
-            /* Fallback green */
-         }
+.health-bar {
+    height: 100%;
+    width: 100%; /* Will be set dynamically by JavaScript */
+    background: linear-gradient(to right, #ff1e00, #00ff00);
+    background-color: #00FF00; /* Fallback color */
+}
 
-         .portfolio-section {
-            width: 100%;
-         }
+/* Portfolio Section */
+.portfolio-section {
+    width: 100%;
+}
 
-         #portfolio-table th,
-         #portfolio-table td {
-            text-align: right;
-         }
+#portfolio-table th, #portfolio-table td {
+    text-align: right; /* Numbers aligned right */
+}
 
-         #portfolio-table th {
-            text-align: left;
-         }
+/* Event Content */
+#event-content {
+    height: 150px;
+    overflow-y: auto;
+    background-color: #111111;
+    padding: 4px;
+    font-size: 10px;
+    color: #00ff00;
+    border: 1px solid #00ff00;
+    box-sizing: border-box;
+}
 
-         #event-content {
-            height: 150px;
-            overflow-y: auto;
-            background-color: #111111;
-            padding: 4px;
-            font-size: 10px;
-            color: #00ff00;
-            border: 1px solid #00ff00;
-         }
+/* Modals */
+.modal {
+    display: none;
+    position: absolute;
+    background-color: #222222;
+    padding: 8px;
+    border: 2px outset #aaaaaa;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    color: #00ff00;
+}
 
-         /* Modal windows */
-         .modal {
-            display: none;
-            position: absolute;
-            background-color: #222222;
-            padding: 8px;
-            border: 2px outset #aaaaaa;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            color: #00ff00;
-         }
+.modal.show {
+    display: block;
+    opacity: 1;
+}
 
-         .modal.show {
-            display: block;
-            opacity: 1;
-         }
+.modal .window-title {
+    border-bottom: 1px solid #00ff00;
+}
 
-         .modal .window-title {
-            border-bottom: 1px solid #00ff00;
-         }
+/* Control Panel */
+.control-panel {
+    margin-top: 4px;
+    display: flex;
+    gap: 4px;
+}
 
-         .player-market-area,
-         .event-log-area,
-         .locations-area {
-            margin-bottom: 0px;
-         }
+/* Inputs, Buttons, Selects */
+button, input, select {
+    font-family: monospace;
+    font-size: 10px;
+    background-color: #333333;
+    color: #00ff00;
+    border: 2px outset #aaaaaa;
+    padding: 2px 4px;
+    margin: 2px;
+    box-sizing: border-box; /* Consistent sizing */
+}
 
-         .control-panel {
-            margin-top: 4px;
-            display: flex;
-            gap: 4px;
-         }
+button:active {
+    border: 2px inset #aaaaaa;
+}
 
-         @media (max-width: 767px) { /* Adjust breakpoint as needed */
-  .game-container {
-    grid-template-columns: 1fr; /* Single column layout */
-    /* Other mobile-specific styles */
-  }
+input[type="number"] {
+    width: 50px;
+}
 
-         .input-error {
-            border-color: red !important;
-            animation: shake 0.3s;
-         }
+/* Start Overlay */
+#start-overlay {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-         @keyframes shake {
-            0% {
-               transform: translateX(0);
-            }
+#start-overlay button {
+    font-size: 2em;
+    padding: 20px 40px;
+    background: #222;
+    border: 3px outset #0f0;
+    color: #0f0;
+    cursor: pointer;
+}
 
-            25% {
-               transform: translateX(-4px);
-            }
+/* Portfolio Summary */
+.portfolio-summary {
+    padding: 5px;
+    border: 1px solid #0f0;
+    margin: 5px 0;
+    background: #111;
+    box-sizing: border-box; /* Include padding in width */
+}
 
-            50% {
-               transform: translateX(4px);
-            }
+/* Stock Price Change Animation */
+.stock-price-change {
+    animation: priceChange 1s forwards;
+    opacity: 0;
+}
 
-            75% {
-               transform: translateX(-4px);
-            }
-
-            100% {
-               transform: translateX(0);
-            }
-         }
-
-         button,
-         input,
-         select {
-            font-family: monospace;
-            font-size: 10px;
-            background-color: #333333;
-            color: #00ff00;
-            border: 2px outset #aaaaaa;
-            padding: 2px 4px;
-            margin: 2px;
-         }
-
-         button:active {
-            border: 2px inset #aaaaaa;
-         }
-
-         input[type="number"] {
-            width: 50px;
-         }
-
-         #start-overlay {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 9999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-         }
-
-         #start-overlay button {
-            font-size: 2em;
-            padding: 20px 40px;
-            background: #222;
-            border: 3px outset #0f0;
-            color: #0f0;
-            cursor: pointer;
-         }
-
-         .portfolio-summary {
-            padding: 5px;
-            border: 1px solid #0f0;
-            margin: 5px 0;
-            background: #111;
-         }
-
-         .stock-price-change {
-            animation: priceChange 1s forwards;
-            opacity: 0;
-         }
-
-         @keyframes priceChange {
-            0% {
-               transform: translateY(0);
-               opacity: 1;
-            }
-
-            50% {
-               transform: translateY(-10px);
-               opacity: 0.5;
-            }
-
-            100% {
-               transform: translateY(10px);
-               opacity: 0;
-            }
-         }
-
-         #history-chart {
-            width: 380px;
-            height: 180px;
-        }
+@keyframes priceChange {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
     }
+
+    50% {
+        transform: translateY(-10px);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+}
+
+/* History Chart */
+#history-chart {
+    width: 380px;
+    height: 180px;
+}
+
+/* Input Error */
+.input-error {
+    border-color: red !important;
+    animation: shake 0.3s;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    50% { transform: translateX(4px); }
+    75% { transform: translateX(-4px); }
+    100% { transform: translateX(0); }
+}
+
+/* Media Queries (Mobile Responsiveness) */
+@media (max-width: 767px) {
+    .game-container {
+        grid-template-columns: 1fr; /* Single column on mobile */
+        grid-template-rows: auto auto; /* Adjust rows as needed */
+    }
+
+    #game-area {
+        aspect-ratio: 16/9; /* Or your aspect ratio */
+    }
+
+}
       </style>
     
 
