@@ -112,17 +112,8 @@
          .health-bar {
             height: 100%;
             width: 100%;
-            .health-bar {
-            background: linear-gradient(
-             to right,
-             #ff0000 0%,
-             #ff3300 25%,
-             #ff6600 50%,
-             #ff9900 75%,
-             #00ff00 100%
-  );
-  transition: width 0.5s ease;
-}
+            background: linear-gradient(to right, #ff1e00, #00ff00);
+            /* Green to Yellow */
             background-color: #00FF00;
             /* Fallback green */
          }
@@ -503,9 +494,8 @@
          let state = {
             cash: 2000,
             debt: 5000,
-            maxHealth: 100,
-            stressLevel: 0, // New property to track cumulative stress
-            lastHealthWarningDay: -7, // Track last health warning day
+            health: 100,
+            inventory: {},
             shortPositions: {},
             marketPrices: {},
             priceHistory: {},
@@ -589,62 +579,37 @@
          }
 
          function renderMarket() {
-  const priceTable = document.getElementById("price-table");
-  const itemSelect = document.getElementById("item-select");
+            const priceTable = document.getElementById("price-table");
+            const itemSelect = document.getElementById("item-select");
+            priceTable.innerHTML = " < tr > < th > Stock < /th> < th > Price < /th> < /tr>";
+            itemSelect.innerHTML = "";
+            stocks.forEach(stock => {
+               const row = priceTable.insertRow();
+               const stockCell = row.insertCell();
+               const priceCell = row.insertCell();
+               stockCell.textContent = stock;
+               priceCell.textContent = `$${state.marketPrices[stock]}`;
+               const option = document.createElement("option");
+               option.value = stock;
+               option.text = stock;
+               itemSelect.appendChild(option);
+            });
+         }
 
-  // Clear table content (important!)
-  priceTable.innerHTML = "";
-
-  // Create table header row (using DOM methods)
-  const headerRow = priceTable.insertRow();
-  headerRow.insertCell().textContent = "Stock";
-  headerRow.insertCell().textContent = "Price";
-
-  // Populate table with data
-  stocks.forEach(stock => {
-    const row = priceTable.insertRow();
-    const stockCell = row.insertCell();
-    const priceCell = row.insertCell();
-
-    stockCell.textContent = stock;
-    priceCell.textContent = `$${state.marketPrices[stock]}`;
-  });
-
-  // Populate item select dropdown (using a more efficient method)
-  itemSelect.innerHTML = ""; // Clear existing options
-  stocks.forEach(stock => {
-      const option = document.createElement("option");
-      option.value = stock;
-      option.text = stock;
-      itemSelect.appendChild(option);
-  });
-
-}
          function renderPortfolio() {
-  const portfolioTable = document.getElementById("portfolio-table");
-
-  // More robust: Clear the table content first
-  portfolioTable.innerHTML = "";
-
-  // Create the header row (using DOM methods - better practice)
-  const headerRow = portfolioTable.insertRow();
-  headerRow.insertCell().textContent = "Stock";
-  headerRow.insertCell().textContent = "Long";
-  headerRow.insertCell().textContent = "Short";
-
-  // Populate the table with data
-  stocks.forEach(stock => {
-    const longQty = state.inventory[stock] || 0;
-    const shortQty = state.shortPositions[stock] || 0;
-
-    if (longQty || shortQty) {
-      const row = portfolioTable.insertRow();
-      row.insertCell().textContent = stock;
-      row.insertCell().textContent = longQty;
-      row.insertCell().textContent = shortQty;
-    }
-  });
-}
+            const portfolioTable = document.getElementById("portfolio-table");
+            portfolioTable.innerHTML = " < tr > < th > Stock < /th> < th > Long < /th> < th > Short < /th> < /tr>";
+            stocks.forEach(stock => {
+               const longQty = state.inventory[stock] || 0;
+               const shortQty = state.shortPositions[stock] || 0;
+               if (longQty || shortQty) {
+                  const row = portfolioTable.insertRow();
+                  row.insertCell().textContent = stock;
+                  row.insertCell().textContent = longQty;
+                  row.insertCell().textContent = shortQty;
+               }
+            });
+         }
 
          function updateUI() {
             document.getElementById("cash").innerText = state.cash;
@@ -764,13 +729,7 @@
             state.cash += 1000;
             logEvent(`Took a $1000 loan (Total repayment: $${amountWithInterest.toFixed(2)}).`);
             updateUI();
-       
-
-            state.stressLevel += 0.5;
-             logEvent(`Took a $1000 loan (Total repayment: $${amountWithInterest.toFixed(2)}). Stress +50%`);
-  
-  updateUI();
-}
+         }
 
          function repayLoan() {
             if (isGameOver) return;
@@ -780,7 +739,7 @@
             }
             state.cash -= 1000;
             state.debt = Math.max(0, state.debt - 1000);
-            logEvent("Repaid $1000 of your loan. Stress -30%");
+            logEvent("Repaid $1000 of your loan.");
             updateUI();
          }
          /***** Daily Events & Turn Progression *****/
@@ -819,9 +778,6 @@
 
          function nextTurn() {
             if (isGameOver) return;
-            economy.update();
-            updatePlayerHealth();
-
             state.day++;
             if (state.day > 30) {
                endGame();
@@ -832,80 +788,6 @@
             logEvent(`--- End of Day ${state.day - 1} Report ---`);
             logEvent(`Cash: $${state.cash} | Debt: $${state.debt} | Health: ${state.health}%`);
          }
-// Add new health management functions
-function updatePlayerHealth() {
-  // Base health degradation
-  const debtRatio = state.debt / (state.cash + state.portfolioValue + 1);
-  const baseHealthLoss = Math.min(debtRatio * 3, 5); // Max 5% loss per day
-  
-  // Stress accumulation
-  state.stressLevel += Math.min(debtRatio * 0.5, 0.25);
-  
-  // Apply compounding stress effects
-  const stressPenalty = 1 + (state.stressLevel / 10);
-  let healthLoss = baseHealthLoss * stressPenalty;
-  
-  // Additional penalty for margin calls
-  if (state.debt > state.cash * 5) {
-    healthLoss += 5; // Extra 5% stress
-    logEvent("Margin Call Stress! Health deteriorating rapidly!");
-  }
-  
-  state.health = Math.max(0, state.health - healthLoss);
-  
-  // Check for critical health events
-  checkHealthEvents();
-}
-
-function checkHealthEvents() {
-  // Game over condition
-  if (state.health <= 0) {
-    endGame("Bankruptcy due to overwhelming financial stress!");
-    return;
-  }
-
-  // Weekly health warnings
-  if (state.day - state.lastHealthWarningDay >= 7) {
-    if (state.health < 50) {
-      const warnings = [
-        "Persistent stress is affecting your health!",
-        "Financial anxiety is taking its toll!",
-        "Consider reducing debt to lower stress levels!"
-      ];
-      logEvent(warnings[Math.floor(Math.random() * warnings.length)]);
-      state.lastHealthWarningDay = state.day;
-    }
-  }
-
-  // Random stress events (higher chance when debt is high)
-  if (Math.random() < 0.25 && state.debt > 10000) {
-    const stressEvents = [
-      { msg: "Loan collector harassment! Health -5%", loss: 5 },
-      { msg: "Stress-induced insomnia! Health -3%", loss: 3 },
-      { msg: "Anxiety about payments! Health -2%", loss: 2 }
-    ];
-    const event = stressEvents[Math.floor(Math.random() * stressEvents.length)];
-    state.health = Math.max(0, state.health - event.loss);
-    logEvent(event.msg);
-  }
-}
-
-    // Modify endGame to accept custom messages
-    function endGame(customMessage = "") {
-     isGameOver = true;
-     let message = customMessage;
-  
-    if (!customMessage) {
-    const finalScore = state.cash - state.debt;
-    message = `Final score: $${finalScore}. `;
-    message += finalScore >= 0 ? "Congratulations!" : "Better luck next time!";
-     }
-
-    logEvent("Game Over! " + message);
-     document.getElementById("gameover-content").innerText = message;
-    openModal("gameover-modal");
-    disableTradingControls();
-}
 
          function endGame() {
             isGameOver = true;
