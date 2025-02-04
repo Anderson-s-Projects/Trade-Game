@@ -16,6 +16,13 @@
 
 
       <style>
+
+#game-area {
+    width: auto;
+    height: 90vh; /* Height will adjust to maintain aspect ratio */
+    aspect-ratio: 16/9; /* Maintain a 16:9 aspect ratio */
+}
+
          /* Retro UI Styles (Inspired by early computer interfaces) */
          body {
             font-family: monospace;
@@ -185,11 +192,11 @@
             gap: 4px;
          }
 
-         @media (max-width: 600px) {
-            .game-container {
-               grid-template-columns: 1fr;
-            }
-         }
+         @media (max-width: 767px) { /* Adjust breakpoint as needed */
+  .game-container {
+    grid-template-columns: 1fr; /* Single column layout */
+    /* Other mobile-specific styles */
+  }
 
          .input-error {
             border-color: red !important;
