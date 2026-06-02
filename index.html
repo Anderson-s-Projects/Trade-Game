@@ -1,6 +1,3 @@
-**Updated Code 
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -77,28 +74,11 @@
             padding: 10px 14px;
         }
         button:hover { background: var(--neon); color: #000; }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #111;
-            border: 2px solid var(--neon);
-            border-radius: 16px;
-            padding: 20px;
-            z-index: 10000;
-            min-width: 320px;
-        }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 2px solid var(--neon); border-radius: 16px; padding: 20px; z-index: 10000; min-width: 320px; }
         .modal.show { display: block; }
-        #event-content {
-            max-height: 180px;
-            overflow-y: auto;
-            background: #0a0a0a;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 14px;
-        }
+        #event-content { max-height: 220px; overflow-y: auto; background: #0a0a0a; padding: 10px; border-radius: 8px; font-size: 14px; }
+        .event-flash { color: #ffff00; animation: flash 1s infinite; }
+        @keyframes flash { 50% { opacity: 0.4; } }
         @media (min-width: 768px) {
             .game-container { grid-template-columns: 340px 1fr; grid-template-rows: auto 1fr; }
             .main-content { grid-template-columns: 1fr 1fr; }
@@ -112,7 +92,7 @@
 
 <div class="game-container">
     <div class="header">
-        <div><strong>Day <span id="current-day">1</span>/30</strong></div>
+        <div><strong>Day <span id="current-day">1</span>/40</strong></div>
         <div>Net Worth: $<span id="networth">0</span></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button onclick="openModal('loan-menu')">Loans</button>
@@ -159,13 +139,14 @@
                 <select id="asset-select" style="width:100%;margin-bottom:8px;"></select>
                 <input type="number" id="qty" placeholder="Quantity" style="width:100%;margin-bottom:8px;">
                 <button onclick="buyAsset()" style="width:48%">BUY</button>
-                <button onclick="sellAsset()" style="width:48%">SELL</button>
+                <button onclick="sellAsset()" style="width:48%">SELL</button><br><br>
+                <button onclick="endDay()" style="width:100%;background:#00ff9d;color:#000;font-weight:bold;padding:12px;">END DAY →</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modals -->
+<!-- Modals (same as before + repayment) -->
 <div id="loan-menu" class="modal">
     <div class="window-title">Loan Market</div>
     <button onclick="takeLoan(3000)">Retail Bank — $3,000</button><br><br>
@@ -222,33 +203,35 @@ let state = {
 };
 
 const locations = [
-    {name: "Wall Street", modifier: 1.0},
-    {name: "Silicon Valley", modifier: 1.25},
-    {name: "Crypto Exchange", modifier: 1.8},
-    {name: "Emerging Markets", modifier: 0.75},
-    {name: "Dark Pool", modifier: 1.4}
+    {name: "Wall Street",     mod: 1.0,  volatility: 0.8},
+    {name: "Silicon Valley",  mod: 1.3,  volatility: 1.4},
+    {name: "Crypto Exchange", mod: 2.1,  volatility: 2.5},
+    {name: "Emerging Markets",mod: 0.85, volatility: 1.8},
+    {name: "Dark Pool",       mod: 1.6,  volatility: 1.9}
 ];
 
-const assetsList = ["AAPL","TSLA","NVDA","BTC","ETH","SOL","PENY","MEME"];
+const assetsList = [
+    {ticker:"AAPL", sector:"Tech"},
+    {ticker:"TSLA", sector:"Tech"},
+    {ticker:"NVDA", sector:"Tech"},
+    {ticker:"BTC",  sector:"Crypto"},
+    {ticker:"ETH",  sector:"Crypto"},
+    {ticker:"SOL",  sector:"Crypto"},
+    {ticker:"XOM",  sector:"Energy"},
+    {ticker:"MEME", sector:"Meme"}
+];
 
-// ==================== CORE FUNCTIONS ====================
-function logEvent(msg) {
+// ==================== CORE ====================
+function logEvent(msg, isBig = false) {
     const log = document.getElementById("event-content");
-    if (!log) return;
     const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-    log.innerHTML += `<p>[${time}] ${msg}</p>`;
+    const style = isBig ? 'class="event-flash"' : '';
+    log.innerHTML += `<p>[${time}] <span ${style}>${msg}</span></p>`;
     log.scrollTop = log.scrollHeight;
 }
 
-function openModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.add("show");
-}
-
-function closeModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.remove("show");
-}
+function openModal(id) { document.getElementById(id).classList.add("show"); }
+function closeModal(id) { document.getElementById(id).classList.remove("show"); }
 
 function updateUI() {
     document.getElementById("cash").textContent = state.cash;
@@ -264,68 +247,116 @@ function updateUI() {
 
     const net = state.cash + getPortfolioValue() + state.offshore - state.debt;
     document.getElementById("networth").textContent = Math.floor(net);
-   
+
     renderPortfolio();
-    checkEncounters();
 }
 
 function getPortfolioValue() {
     let val = 0;
-    Object.keys(state.assets).forEach(t => val += (state.assets[t].qty || 0) * (state.marketPrices[t] || 0));
+    Object.keys(state.assets).forEach(t => {
+        val += (state.assets[t].qty || 0) * (state.marketPrices[t] || 0);
+    });
     return val;
 }
 
-// ==================== TRAVEL + MARKET ====================
-function travel(newLoc) {
-    if (newLoc === state.location) return;
-
-    // Advance day when changing locations
-    state.day++;
-    if (state.day > 30) return endGame();
-
-    state.location = newLoc;
-    logEvent(`Traveled to ${locations[newLoc].name} — Day advanced`);
-    
-    generateMarket();  // New prices for new location + new day
-    updateUI();
-}
-
+// ==================== MARKET & EVENTS ====================
 function generateMarket() {
-    const locMod = locations[state.location].modifier;
-    const trend = (Math.random() * 0.32) - 0.16;
-    
-    document.getElementById("market-trend").textContent = 
-        trend > 0.1 ? "Bullish" : trend < -0.1 ? "Bearish" : "Neutral";
+    const loc = locations[state.location];
+    const globalTrend = (Math.random() * 0.4) - 0.2;
 
-    assetsList.forEach(a => {
-        state.lastPrices[a] = state.marketPrices[a] || 120;
+    document.getElementById("market-trend").textContent = 
+        globalTrend > 0.12 ? "Bullish" : globalTrend < -0.12 ? "Bearish" : "Neutral";
+
+    assetsList.forEach(asset => {
+        const ticker = asset.ticker;
+        state.lastPrices[ticker] = state.marketPrices[ticker] || 100;
+
+        let price = state.marketPrices[ticker] || (50 + Math.random() * 400);
+        const volatility = loc.volatility * (asset.sector === "Crypto" ? 2.2 : 1);
+
+        // Volatility swing
+        price *= (1 + (Math.random() * volatility * 2 - volatility) + globalTrend);
+
+        // Sector bias
+        if (asset.sector === "Tech" && Math.random() < 0.4) price *= 1.08;
+        if (asset.sector === "Crypto" && Math.random() < 0.5) price *= (Math.random() > 0.5 ? 1.25 : 0.75);
+
+        state.marketPrices[ticker] = Math.max(5, Math.floor(price));
         
-        let basePrice = state.marketPrices[a] || (80 + Math.random() * 350);
-        let price = basePrice * (1 + trend) * locMod;
-        price = Math.max(5, Math.floor(price));
-        
-        state.marketPrices[a] = price;
-        
-        if (!state.priceHistory[a]) state.priceHistory[a] = [];
-        state.priceHistory[a].push(price);
+        if (!state.priceHistory[ticker]) state.priceHistory[ticker] = [];
+        state.priceHistory[ticker].push(state.marketPrices[ticker]);
     });
 
     renderMarket();
+    triggerRandomEvents();
 }
 
 function renderMarket() {
     const table = document.getElementById("price-table");
-    table.innerHTML = `<tr><th>Asset</th><th>Price</th></tr>`;
+    table.innerHTML = `<tr><th>Asset</th><th>Price</th><th>Chg</th></tr>`;
+
     assetsList.forEach(a => {
-        const p = state.marketPrices[a];
-        const last = state.lastPrices[a] || p;
-        const chg = p - last;
+        const ticker = a.ticker;
+        const p = state.marketPrices[ticker];
+        const last = state.lastPrices[ticker] || p;
+        const chg = ((p - last) / last * 100).toFixed(1);
         const row = table.insertRow();
-        row.innerHTML = `<td>${a}</td><td class="${chg>0?'price-up':'price-down'}">$${p}</td>`;
+        row.innerHTML = `<td>${ticker}</td><td>$${p}</td><td class="${chg>0?'price-up':'price-down'}">${chg}%</td>`;
     });
 
     const select = document.getElementById("asset-select");
-    select.innerHTML = assetsList.map(a => `<option value="${a}">${a}</option>`).join('');
+    select.innerHTML = assetsList.map(a => `<option value="${a.ticker}">${a.ticker}</option>`).join('');
+}
+
+function triggerRandomEvents() {
+    // Global Events
+    if (Math.random() < 0.25) {
+        const events = [
+            ["🚨 FED RAISES RATES", -0.18],
+            ["🌟 TECH EARNINGS BEAT", 0.22],
+            ["💥 CRYPTO REGULATION", -0.35],
+            ["🔥 MEME STOCK MANIA", 0.45],
+            ["📉 RECESSION FEARS", -0.25]
+        ];
+        const [msg, mult] = events[Math.floor(Math.random()*events.length)];
+        logEvent(msg, true);
+        assetsList.forEach(a => {
+            if (Math.random() < 0.7) state.marketPrices[a.ticker] = Math.floor(state.marketPrices[a.ticker] * (1 + mult));
+        });
+    }
+
+    // Company / Sector Events
+    if (Math.random() < 0.45) {
+        const asset = assetsList[Math.floor(Math.random()*assetsList.length)];
+        const mult = Math.random() > 0.5 ? 1.35 : 0.65;
+        state.marketPrices[asset.ticker] = Math.floor(state.marketPrices[asset.ticker] * mult);
+        logEvent(`${asset.ticker} ${mult>1?'SURGES':'CRASHES'} on news!`, true);
+    }
+}
+
+// ==================== TRAVEL & DAY CYCLE ====================
+function travel(newLoc) {
+    if (newLoc === state.location) return;
+    state.day++;
+    if (state.day > 40) return endGame();
+
+    state.location = newLoc;
+    logEvent(`Traveled to ${locations[newLoc].name} — Lost 1 day`, true);
+    generateMarket();
+    updateUI();
+}
+
+function endDay() {
+    state.day++;
+    if (state.day > 40) return endGame();
+
+    state.debt = Math.floor(state.debt * 1.023);
+    state.stress = Math.min(98, state.stress + 5);
+    state.offshore = Math.floor(state.offshore * 1.004);
+
+    logEvent(`=== Day ${state.day} ended in ${locations[state.location].name} ===`);
+    generateMarket();
+    updateUI();
 }
 
 // ==================== TRADING ====================
@@ -342,9 +373,8 @@ function buyAsset() {
     if (!state.assets[ticker]) state.assets[ticker] = {qty: 0, avgPrice: state.marketPrices[ticker]};
     
     const pos = state.assets[ticker];
-    const totalCost = (pos.qty * pos.avgPrice) + cost;
     pos.qty += qty;
-    pos.avgPrice = totalCost / pos.qty;
+    pos.avgPrice = ((pos.qty - qty) * pos.avgPrice + cost) / pos.qty;
 
     logEvent(`Bought ${qty} ${ticker}`);
     updateUI();
@@ -366,10 +396,10 @@ function sellAsset() {
     updateUI();
 }
 
-// ==================== LOANS ====================
+// ==================== LOANS, UPGRADES, OFFSHORE ====================
 function takeLoan(amount) {
     state.cash += amount;
-    state.debt += Math.floor(amount * 1.18);
+    state.debt += Math.floor(amount * 1.22);
     logEvent(`Loan approved: $${amount}`);
     updateUI();
     closeModal('loan-menu');
@@ -377,9 +407,8 @@ function takeLoan(amount) {
 
 function repayLoan() {
     const amt = parseInt(document.getElementById("repay-amt").value) || 0;
-    if (amt <= 0) return logEvent("Invalid amount");
-    if (amt > state.cash) return logEvent("Not enough cash to repay");
-    if (amt > state.debt) return logEvent("Overpaying debt not allowed");
+    if (amt <= 0 || amt > state.cash) return logEvent("Invalid repayment");
+    if (amt > state.debt) return logEvent("Cannot overpay");
 
     state.cash -= amt;
     state.debt -= amt;
@@ -387,9 +416,8 @@ function repayLoan() {
     updateUI();
 }
 
-// ==================== UPGRADES + OFFSHORE ====================
 function upgradeTerminal() {
-    if (state.cash < 10000) return logEvent("Need $10,000");
+    if (state.cash < 10000) return logEvent("Need $10k");
     state.cash -= 10000;
     state.terminalLevel = 1;
     logEvent("Terminal upgraded to Pro");
@@ -398,17 +426,17 @@ function upgradeTerminal() {
 }
 
 function upgradeCapacity() {
-    if (state.cash < 5000) return logEvent("Need $5,000");
+    if (state.cash < 5000) return logEvent("Need $5k");
     state.cash -= 5000;
     state.maxPositions += 5;
-    logEvent("Portfolio capacity +5");
+    logEvent("Portfolio slots +5");
     updateUI();
     closeModal('upgrade-menu');
 }
 
 function depositOffshore() {
     const amt = parseInt(document.getElementById("offshore-amt").value) || 0;
-    if (amt > state.cash) return logEvent("Not enough cash");
+    if (amt > state.cash) return;
     state.cash -= amt;
     state.offshore += amt;
     logEvent(`Deposited $${amt} offshore`);
@@ -417,7 +445,7 @@ function depositOffshore() {
 
 function withdrawOffshore() {
     const amt = parseInt(document.getElementById("offshore-amt").value) || 0;
-    if (amt > state.offshore) return logEvent("Not enough in offshore");
+    if (amt > state.offshore) return;
     state.offshore -= amt;
     state.cash += amt;
     logEvent(`Withdrew $${amt} from offshore`);
@@ -426,42 +454,33 @@ function withdrawOffshore() {
 
 // ==================== ENCOUNTERS ====================
 function checkEncounters() {
-    if (Math.random() < 0.18) triggerSEC();
-    if (Math.random() < 0.25) triggerNewsEvent();
+    if (Math.random() < 0.22) triggerSEC();
 }
 
 function triggerSEC() {
-    document.getElementById("sec-text").innerHTML = `SEC is investigating your recent trades.`;
+    document.getElementById("sec-text").innerHTML = `SEC is investigating suspicious trading activity.`;
     openModal('sec-modal');
 }
 
 function handleSEC(choice) {
     closeModal('sec-modal');
     if (choice === 0) {
-        state.cash = Math.floor(state.cash * 0.8);
-        logEvent("SEC fine paid (-20% cash)");
+        state.cash = Math.floor(state.cash * 0.78);
+        logEvent("SEC fine paid (-22% cash)");
     } else if (choice === 1) {
-        if (state.cash < 8000) state.cash = Math.floor(state.cash * 0.75);
-        else state.cash -= 8000;
-        logEvent("Lawyers handled the case.");
+        state.cash = Math.max(0, state.cash - 8000);
+        logEvent("Lawyers handled SEC case");
     } else {
-        if (Math.random() < 0.45) logEvent("You successfully hid assets!");
+        if (Math.random() < 0.4) logEvent("Assets successfully hidden!");
         else {
-            logEvent("Assets seized!");
-            state.cash = Math.floor(state.cash * 0.35);
+            logEvent("Assets seized by SEC!");
+            state.cash = Math.floor(state.cash * 0.3);
         }
     }
     updateUI();
 }
 
-function triggerNewsEvent() {
-    const events = [["🚨 TSLA surges after news", "TSLA", 1.45], ["💥 BTC crashes on regulation", "BTC", 0.65]];
-    const [msg, ticker, mult] = events[Math.floor(Math.random()*events.length)];
-    logEvent(msg);
-    if (ticker) state.marketPrices[ticker] = Math.floor(state.marketPrices[ticker] * mult);
-}
-
-// ==================== PORTFOLIO ====================
+// ==================== RENDER & START ====================
 function renderPortfolio() {
     const table = document.getElementById("portfolio-table");
     table.innerHTML = `<tr><th>Asset</th><th>Qty</th><th>P/L</th></tr>`;
@@ -476,25 +495,15 @@ function renderPortfolio() {
 
 function endGame() {
     const net = state.cash + getPortfolioValue() + state.offshore - state.debt;
-    alert(`Game Over!\nFinal Net Worth: $${Math.floor(net)}`);
+    alert(`Game Over! Final Net Worth: $${Math.floor(net)}\nYou survived ${state.day} days.`);
 }
 
 function startGame() {
     document.getElementById('start-overlay').style.display = 'none';
     generateMarket();
     updateUI();
-    logEvent("Welcome to Stock Wars Tycoon 2026. Travel costs 1 day. Prices are location-specific.");
+    logEvent("Welcome to Stock Wars Tycoon 2026. Trade hard. Survive harder.");
 }
 </script>
 </body>
 </html>
-```
-
-### Changes Made:
-
-- **Loan Repayment**: Added a repayment section in the Loans menu.
-- **Asset Prices**: Prices now vary by location (via modifier) and **stay stable** until you travel (which advances the day).
-- **Travel**: Now costs **1 full day**.
-- **Removed Next Day button** completely — time only progresses when you travel.
-
-Let me know if you want further tweaks (like daily interest even without travel, random events without travel, etc.)!
