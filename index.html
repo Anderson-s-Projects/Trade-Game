@@ -4,81 +4,40 @@
     <title>Stock Wars Tycoon</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
-        :root {
-            --neon: #00ff9d;
-            --dark: #0a0a0a;
-            --card: #121212;
-        }
+        :root { --neon: #00ff9d; --dark: #0a0a0a; --card: #121212; }
         * { box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', system-ui, monospace;
             background: linear-gradient(135deg, #0a0a0a, #1a0033);
             color: #e0ffe0;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            min-height: 100vh;
+            margin: 0; padding: 0;
+            overflow: hidden; min-height: 100vh;
         }
-        .game-container {
-            width: 100vw;
-            height: 100vh;
-            display: grid;
-            grid-template-rows: auto 1fr;
-            gap: 8px;
-            padding: 8px;
-        }
+        .game-container { width: 100vw; height: 100vh; display: grid; grid-template-rows: auto 1fr; gap: 8px; padding: 8px; }
         .header {
-            background: rgba(20, 20, 30, 0.95);
-            border: 1px solid var(--neon);
-            border-radius: 12px;
-            padding: 12px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            align-items: center;
-            justify-content: space-between;
+            background: rgba(20,20,30,0.95); border: 1px solid var(--neon); border-radius: 12px;
+            padding: 12px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
         }
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-            overflow: auto;
-        }
-        .window {
-            background: var(--card);
-            border: 1px solid rgba(0, 255, 157, 0.3);
-            border-radius: 12px;
-            padding: 14px;
-        }
+        .main-content { display: grid; grid-template-columns: 1fr; gap: 8px; overflow: auto; }
+        .window { background: var(--card); border: 1px solid rgba(0,255,157,0.3); border-radius: 12px; padding: 14px; }
         .window-title {
-            background: linear-gradient(to right, #1a0033, #003322);
-            color: var(--neon);
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            font-weight: bold;
-            text-align: center;
+            background: linear-gradient(to right, #1a0033, #003322); color: var(--neon);
+            padding: 10px; border-radius: 8px; margin-bottom: 12px; font-weight: bold; text-align: center;
         }
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 8px 10px; border-bottom: 1px solid rgba(0, 255, 157, 0.2); }
+        th, td { padding: 8px 10px; border-bottom: 1px solid rgba(0,255,157,0.2); }
         th { color: var(--neon); }
         .price-up { color: #00ff9d; }
         .price-down { color: #ff3366; }
-        button, select, input {
-            background: #1f1f2e;
-            color: #e0ffe0;
-            border: 1px solid var(--neon);
-            border-radius: 8px;
-            padding: 10px 14px;
-        }
+        button, select, input { background: #1f1f2e; color: #e0ffe0; border: 1px solid var(--neon); border-radius: 8px; padding: 10px 14px; }
         button:hover { background: var(--neon); color: #000; }
-        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 2px solid var(--neon); border-radius: 16px; padding: 20px; z-index: 10000; min-width: 320px; }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 2px solid var(--neon); border-radius: 16px; padding: 20px; z-index: 10000; min-width: 340px; }
         .modal.show { display: block; }
-        #event-content { max-height: 220px; overflow-y: auto; background: #0a0a0a; padding: 10px; border-radius: 8px; font-size: 14px; }
-        .event-flash { color: #ffff00; animation: flash 1s infinite; }
-        @keyframes flash { 50% { opacity: 0.4; } }
+        #event-content { max-height: 240px; overflow-y: auto; background: #0a0a0a; padding: 10px; border-radius: 8px; font-size: 14px; }
+        .event-flash { color: #ffff00; font-weight: bold; animation: flash 1.2s infinite; }
+        @keyframes flash { 50% { opacity: 0.3; } }
+        #price-history-list { max-height: 160px; overflow-y: auto; background: #0a0a0a; padding: 10px; border-radius: 8px; font-size: 13px; }
         @media (min-width: 768px) {
             .game-container { grid-template-columns: 340px 1fr; grid-template-rows: auto 1fr; }
             .main-content { grid-template-columns: 1fr 1fr; }
@@ -87,13 +46,14 @@
 </head>
 <body>
 <div id="start-overlay" style="position:fixed;inset:0;background:linear-gradient(#0a0a0a,#1a0033);z-index:9999;display:flex;justify-content:center;align-items:center;">
-    <button onclick="startGame()" style="font-size:2.8em;padding:40px 80px;background:transparent;border:3px solid #00ff9d;color:#00ff9d;border-radius:9999px;">STOCK WARS TYCOON 2026</button>
+    <button onclick="startGame()" style="font-size:2.8em;padding:40px 80px;background:transparent;border:3px solid #00ff9d;color:#00ff9d;border-radius:9999px;">STOCK WARS</button>
 </div>
 
 <div class="game-container">
     <div class="header">
         <div><strong>Day <span id="current-day">1</span>/40</strong></div>
         <div>Net Worth: $<span id="networth">0</span></div>
+        <div>Heat: <span id="heat-level">0</span>%</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button onclick="openModal('loan-menu')">Loans</button>
             <button onclick="openModal('upgrade-menu')">Upgrades</button>
@@ -131,12 +91,16 @@
                 <table id="price-table"></table>
             </div>
             <div class="window">
+                <div class="window-title">Price History • <span id="selected-asset">AAPL</span></div>
+                <div id="price-history-list"></div>
+            </div>
+            <div class="window">
                 <div class="window-title">News Terminal</div>
                 <div id="event-content"></div>
             </div>
             <div class="window">
                 <div class="window-title">Trading Terminal <span id="terminal-level">(Basic)</span></div>
-                <select id="asset-select" style="width:100%;margin-bottom:8px;"></select>
+                <select id="asset-select" style="width:100%;margin-bottom:8px;" onchange="updatePriceHistory()"></select>
                 <input type="number" id="qty" placeholder="Quantity" style="width:100%;margin-bottom:8px;">
                 <button onclick="buyAsset()" style="width:48%">BUY</button>
                 <button onclick="sellAsset()" style="width:48%">SELL</button><br><br>
@@ -146,7 +110,7 @@
     </div>
 </div>
 
-<!-- Modals (same as before + repayment) -->
+<!-- Modals -->
 <div id="loan-menu" class="modal">
     <div class="window-title">Loan Market</div>
     <button onclick="takeLoan(3000)">Retail Bank — $3,000</button><br><br>
@@ -187,41 +151,27 @@
 <script>
 // ==================== STATE ====================
 let state = {
-    cash: 2000,
-    debt: 5500,
-    stress: 25,
-    reputation: 15,
-    offshore: 0,
-    day: 1,
-    location: 0,
-    terminalLevel: 0,
-    maxPositions: 8,
-    assets: {},
-    marketPrices: {},
-    lastPrices: {},
-    priceHistory: {}
+    cash: 2000, debt: 5500, stress: 25, reputation: 15, offshore: 0,
+    day: 1, location: 0, terminalLevel: 0, maxPositions: 8, heat: 0,
+    assets: {}, marketPrices: {}, lastPrices: {}, priceHistory: {}
 };
 
 const locations = [
     {name: "Wall Street",     mod: 1.0,  volatility: 0.8},
-    {name: "Silicon Valley",  mod: 1.3,  volatility: 1.4},
-    {name: "Crypto Exchange", mod: 2.1,  volatility: 2.5},
-    {name: "Emerging Markets",mod: 0.85, volatility: 1.8},
-    {name: "Dark Pool",       mod: 1.6,  volatility: 1.9}
+    {name: "Silicon Valley",  mod: 1.3,  volatility: 1.45},
+    {name: "Crypto Exchange", mod: 2.1,  volatility: 2.6},
+    {name: "Emerging Markets",mod: 0.85, volatility: 1.9},
+    {name: "Dark Pool",       mod: 1.6,  volatility: 2.0}
 ];
 
 const assetsList = [
-    {ticker:"AAPL", sector:"Tech"},
-    {ticker:"TSLA", sector:"Tech"},
-    {ticker:"NVDA", sector:"Tech"},
-    {ticker:"BTC",  sector:"Crypto"},
-    {ticker:"ETH",  sector:"Crypto"},
-    {ticker:"SOL",  sector:"Crypto"},
-    {ticker:"XOM",  sector:"Energy"},
-    {ticker:"MEME", sector:"Meme"}
+    {ticker:"AAPL", sector:"Tech"}, {ticker:"TSLA", sector:"Tech"},
+    {ticker:"NVDA", sector:"Tech"}, {ticker:"BTC",  sector:"Crypto"},
+    {ticker:"ETH",  sector:"Crypto"}, {ticker:"SOL", sector:"Crypto"},
+    {ticker:"XOM",  sector:"Energy"}, {ticker:"MEME", sector:"Meme"}
 ];
 
-// ==================== CORE ====================
+// ==================== CORE FUNCTIONS ====================
 function logEvent(msg, isBig = false) {
     const log = document.getElementById("event-content");
     const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
@@ -243,106 +193,140 @@ function updateUI() {
     document.getElementById("offshore-balance").textContent = state.offshore;
     document.getElementById("positions").textContent = Object.keys(state.assets).length;
     document.getElementById("max-positions").textContent = state.maxPositions;
+    document.getElementById("heat-level").textContent = state.heat;
     document.getElementById("terminal-level").textContent = state.terminalLevel ? "(Pro)" : "(Basic)";
 
     const net = state.cash + getPortfolioValue() + state.offshore - state.debt;
     document.getElementById("networth").textContent = Math.floor(net);
-
     renderPortfolio();
 }
 
 function getPortfolioValue() {
     let val = 0;
-    Object.keys(state.assets).forEach(t => {
-        val += (state.assets[t].qty || 0) * (state.marketPrices[t] || 0);
-    });
+    Object.keys(state.assets).forEach(t => val += (state.assets[t].qty || 0) * (state.marketPrices[t] || 0));
     return val;
 }
 
-// ==================== MARKET & EVENTS ====================
+// ==================== MARKET ====================
 function generateMarket() {
     const loc = locations[state.location];
-    const globalTrend = (Math.random() * 0.4) - 0.2;
+    const globalTrend = (Math.random() * 0.45) - 0.22;
 
-    document.getElementById("market-trend").textContent = 
-        globalTrend > 0.12 ? "Bullish" : globalTrend < -0.12 ? "Bearish" : "Neutral";
+    document.getElementById("market-trend").textContent = globalTrend > 0.15 ? "Bullish" : globalTrend < -0.15 ? "Bearish" : "Neutral";
 
     assetsList.forEach(asset => {
-        const ticker = asset.ticker;
-        state.lastPrices[ticker] = state.marketPrices[ticker] || 100;
+        const t = asset.ticker;
+        state.lastPrices[t] = state.marketPrices[t] || 120;
 
-        let price = state.marketPrices[ticker] || (50 + Math.random() * 400);
-        const volatility = loc.volatility * (asset.sector === "Crypto" ? 2.2 : 1);
+        let price = state.marketPrices[t] || (60 + Math.random() * 420);
+        const vol = loc.volatility * (asset.sector === "Crypto" ? 2.4 : 1);
 
-        // Volatility swing
-        price *= (1 + (Math.random() * volatility * 2 - volatility) + globalTrend);
+        price *= (1 + globalTrend + (Math.random() * vol * 2 - vol));
 
-        // Sector bias
-        if (asset.sector === "Tech" && Math.random() < 0.4) price *= 1.08;
-        if (asset.sector === "Crypto" && Math.random() < 0.5) price *= (Math.random() > 0.5 ? 1.25 : 0.75);
+        if (state.priceHistory[t] && state.priceHistory[t].length > 3) {
+            const recent = state.priceHistory[t].slice(-3);
+            const momentum = (recent[2] - recent[0]) / recent[0];
+            if (momentum > 0.3) price *= (Math.random() < 0.6 ? 0.88 : 1.12);
+        }
 
-        state.marketPrices[ticker] = Math.max(5, Math.floor(price));
-        
-        if (!state.priceHistory[ticker]) state.priceHistory[ticker] = [];
-        state.priceHistory[ticker].push(state.marketPrices[ticker]);
+        state.marketPrices[t] = Math.max(5, Math.floor(price));
+
+        if (!state.priceHistory[t]) state.priceHistory[t] = [];
+        state.priceHistory[t].push(state.marketPrices[t]);
+        if (state.priceHistory[t].length > 15) state.priceHistory[t].shift();
     });
 
     renderMarket();
+    updatePriceHistory();
     triggerRandomEvents();
 }
 
 function renderMarket() {
     const table = document.getElementById("price-table");
     table.innerHTML = `<tr><th>Asset</th><th>Price</th><th>Chg</th></tr>`;
-
     assetsList.forEach(a => {
-        const ticker = a.ticker;
-        const p = state.marketPrices[ticker];
-        const last = state.lastPrices[ticker] || p;
+        const t = a.ticker;
+        const p = state.marketPrices[t];
+        const last = state.lastPrices[t] || p;
         const chg = ((p - last) / last * 100).toFixed(1);
         const row = table.insertRow();
-        row.innerHTML = `<td>${ticker}</td><td>$${p}</td><td class="${chg>0?'price-up':'price-down'}">${chg}%</td>`;
+        row.innerHTML = `<td>${t}</td><td>$${p}</td><td class="${chg>0?'price-up':'price-down'}">${chg}%</td>`;
     });
 
     const select = document.getElementById("asset-select");
     select.innerHTML = assetsList.map(a => `<option value="${a.ticker}">${a.ticker}</option>`).join('');
 }
 
+function updatePriceHistory() {
+    const ticker = document.getElementById("asset-select").value || "AAPL";
+    document.getElementById("selected-asset").textContent = ticker;
+
+    const history = state.priceHistory[ticker] || [];
+    const listEl = document.getElementById("price-history-list");
+    
+    let html = `<strong>Recent prices for ${ticker}:</strong><br>`;
+    for (let i = history.length - 1; i >= 0; i--) {
+        html += `Day ${state.day - (history.length - 1 - i)}: <span style="color:#00ff9d">$${history[i]}</span><br>`;
+    }
+    listEl.innerHTML = html;
+}
+
+// ==================== DRAMATIC EVENTS ====================
 function triggerRandomEvents() {
-    // Global Events
-    if (Math.random() < 0.25) {
+    const heatMod = state.heat / 200;
+
+    if (Math.random() < 0.45 + heatMod * 0.6) {
         const events = [
-            ["🚨 FED RAISES RATES", -0.18],
-            ["🌟 TECH EARNINGS BEAT", 0.22],
-            ["💥 CRYPTO REGULATION", -0.35],
-            ["🔥 MEME STOCK MANIA", 0.45],
-            ["📉 RECESSION FEARS", -0.25]
+            () => { // Meme Frenzy
+                const asset = assetsList.find(a => a.ticker === "MEME") || assetsList[Math.floor(Math.random()*assetsList.length)];
+                const mult = 4 + Math.random() * 8;
+                state.marketPrices[asset.ticker] = Math.floor(state.marketPrices[asset.ticker] * mult);
+                logEvent(`🚀 ${asset.ticker} IS GOING VIRAL! +${Math.floor((mult-1)*100)}%`, true);
+            },
+            () => { // Flash Crash
+                logEvent("⚡ FLASH CRASH! ALGORITHMS GONE WILD", true);
+                assetsList.forEach(a => {
+                    if (Math.random() < 0.7) state.marketPrices[a.ticker] = Math.floor(state.marketPrices[a.ticker] * (0.4 + Math.random()*0.4));
+                });
+            },
+            () => { // Short Squeeze
+                const asset = assetsList[Math.floor(Math.random()*assetsList.length)];
+                state.marketPrices[asset.ticker] = Math.floor(state.marketPrices[asset.ticker] * (3 + Math.random()*6));
+                logEvent(`💥 ${asset.ticker} SHORT SQUEEZE! MASSIVE SPIKE!`, true);
+            },
+            () => { // Massive Share Offering
+                const asset = assetsList[Math.floor(Math.random()*assetsList.length)];
+                state.marketPrices[asset.ticker] = Math.floor(state.marketPrices[asset.ticker] * 0.45);
+                logEvent(`📉 ${asset.ticker} announces huge share offering — price tanks!`, true);
+            }
         ];
-        const [msg, mult] = events[Math.floor(Math.random()*events.length)];
-        logEvent(msg, true);
-        assetsList.forEach(a => {
-            if (Math.random() < 0.7) state.marketPrices[a.ticker] = Math.floor(state.marketPrices[a.ticker] * (1 + mult));
-        });
+        events[Math.floor(Math.random() * events.length)]();
     }
 
-    // Company / Sector Events
-    if (Math.random() < 0.45) {
+    if (Math.random() < 0.55) {
         const asset = assetsList[Math.floor(Math.random()*assetsList.length)];
-        const mult = Math.random() > 0.5 ? 1.35 : 0.65;
+        const mult = Math.random() > 0.5 ? (1.6 + Math.random()*1.2) : (0.3 + Math.random()*0.5);
         state.marketPrices[asset.ticker] = Math.floor(state.marketPrices[asset.ticker] * mult);
-        logEvent(`${asset.ticker} ${mult>1?'SURGES':'CRASHES'} on news!`, true);
+        logEvent(`${asset.ticker} ${mult > 1 ? 'EXPLODES' : 'CRASHES'} on breaking news!`, true);
     }
 }
 
-// ==================== TRAVEL & DAY CYCLE ====================
+function checkEncounters() {
+    const heatChance = Math.min(0.45, 0.18 + state.heat / 200);
+    if (Math.random() < heatChance) triggerSEC();
+}
+
+// ==================== DAY, TRAVEL, TRADING ====================
 function travel(newLoc) {
     if (newLoc === state.location) return;
     state.day++;
     if (state.day > 40) return endGame();
 
     state.location = newLoc;
+    state.heat = Math.max(0, state.heat - 10);
     logEvent(`Traveled to ${locations[newLoc].name} — Lost 1 day`, true);
     generateMarket();
+    checkEncounters();
     updateUI();
 }
 
@@ -351,15 +335,16 @@ function endDay() {
     if (state.day > 40) return endGame();
 
     state.debt = Math.floor(state.debt * 1.023);
-    state.stress = Math.min(98, state.stress + 5);
+    state.stress = Math.min(98, state.stress + 7);
     state.offshore = Math.floor(state.offshore * 1.004);
+    state.heat = Math.max(0, Math.min(100, state.heat + 5));
 
-    logEvent(`=== Day ${state.day} ended in ${locations[state.location].name} ===`);
+    logEvent(`=== DAY ${state.day} BEGINS ===`, true);
     generateMarket();
+    checkEncounters();
     updateUI();
 }
 
-// ==================== TRADING ====================
 function buyAsset() {
     const qty = parseInt(document.getElementById("qty").value) || 0;
     if (qty <= 0) return logEvent("Invalid quantity");
@@ -371,13 +356,17 @@ function buyAsset() {
 
     state.cash -= cost;
     if (!state.assets[ticker]) state.assets[ticker] = {qty: 0, avgPrice: state.marketPrices[ticker]};
-    
-    const pos = state.assets[ticker];
-    pos.qty += qty;
-    pos.avgPrice = ((pos.qty - qty) * pos.avgPrice + cost) / pos.qty;
 
+    const pos = state.assets[ticker];
+    const oldQty = pos.qty;
+    pos.qty += qty;
+    const totalCost = (oldQty * pos.avgPrice) + cost;
+    pos.avgPrice = totalCost / pos.qty;
+
+    state.heat = Math.min(100, state.heat + Math.floor(qty / 8));
     logEvent(`Bought ${qty} ${ticker}`);
     updateUI();
+    updatePriceHistory();
 }
 
 function sellAsset() {
@@ -394,12 +383,14 @@ function sellAsset() {
 
     logEvent(`Sold ${qty} ${ticker}`);
     updateUI();
+    updatePriceHistory();
 }
 
-// ==================== LOANS, UPGRADES, OFFSHORE ====================
+// Loans, Upgrades, Offshore, SEC (same as before)
 function takeLoan(amount) {
     state.cash += amount;
     state.debt += Math.floor(amount * 1.22);
+    state.heat += 12;
     logEvent(`Loan approved: $${amount}`);
     updateUI();
     closeModal('loan-menu');
@@ -407,12 +398,10 @@ function takeLoan(amount) {
 
 function repayLoan() {
     const amt = parseInt(document.getElementById("repay-amt").value) || 0;
-    if (amt <= 0 || amt > state.cash) return logEvent("Invalid repayment");
-    if (amt > state.debt) return logEvent("Cannot overpay");
-
+    if (amt <= 0 || amt > state.cash || amt > state.debt) return logEvent("Invalid repayment");
     state.cash -= amt;
     state.debt -= amt;
-    logEvent(`Repaid $${amt} of debt`);
+    logEvent(`Repaid $${amt}`);
     updateUI();
 }
 
@@ -429,7 +418,7 @@ function upgradeCapacity() {
     if (state.cash < 5000) return logEvent("Need $5k");
     state.cash -= 5000;
     state.maxPositions += 5;
-    logEvent("Portfolio slots +5");
+    logEvent("Portfolio +5 slots");
     updateUI();
     closeModal('upgrade-menu');
 }
@@ -437,8 +426,7 @@ function upgradeCapacity() {
 function depositOffshore() {
     const amt = parseInt(document.getElementById("offshore-amt").value) || 0;
     if (amt > state.cash) return;
-    state.cash -= amt;
-    state.offshore += amt;
+    state.cash -= amt; state.offshore += amt;
     logEvent(`Deposited $${amt} offshore`);
     updateUI();
 }
@@ -446,41 +434,35 @@ function depositOffshore() {
 function withdrawOffshore() {
     const amt = parseInt(document.getElementById("offshore-amt").value) || 0;
     if (amt > state.offshore) return;
-    state.offshore -= amt;
-    state.cash += amt;
-    logEvent(`Withdrew $${amt} from offshore`);
+    state.offshore -= amt; state.cash += amt;
+    logEvent(`Withdrew $${amt}`);
     updateUI();
 }
 
-// ==================== ENCOUNTERS ====================
-function checkEncounters() {
-    if (Math.random() < 0.22) triggerSEC();
-}
-
 function triggerSEC() {
-    document.getElementById("sec-text").innerHTML = `SEC is investigating suspicious trading activity.`;
+    document.getElementById("sec-text").innerHTML = `SEC is investigating your activity.<br>High heat detected.`;
     openModal('sec-modal');
 }
 
 function handleSEC(choice) {
     closeModal('sec-modal');
-    if (choice === 0) {
-        state.cash = Math.floor(state.cash * 0.78);
-        logEvent("SEC fine paid (-22% cash)");
-    } else if (choice === 1) {
-        state.cash = Math.max(0, state.cash - 8000);
-        logEvent("Lawyers handled SEC case");
+    if (choice === 0) { 
+        state.cash = Math.floor(state.cash * 0.75); 
+        logEvent("SEC fine paid (-25%)"); 
+    } else if (choice === 1) { 
+        state.cash = Math.max(0, state.cash - 9000); 
+        logEvent("Lawyers handled SEC"); 
     } else {
-        if (Math.random() < 0.4) logEvent("Assets successfully hidden!");
-        else {
-            logEvent("Assets seized by SEC!");
-            state.cash = Math.floor(state.cash * 0.3);
+        if (Math.random() < 0.38) logEvent("You hid assets successfully!");
+        else { 
+            logEvent("Assets seized!"); 
+            state.cash = Math.floor(state.cash * 0.28); 
         }
     }
+    state.heat = Math.max(0, state.heat - 25);
     updateUI();
 }
 
-// ==================== RENDER & START ====================
 function renderPortfolio() {
     const table = document.getElementById("portfolio-table");
     table.innerHTML = `<tr><th>Asset</th><th>Qty</th><th>P/L</th></tr>`;
@@ -495,14 +477,15 @@ function renderPortfolio() {
 
 function endGame() {
     const net = state.cash + getPortfolioValue() + state.offshore - state.debt;
-    alert(`Game Over! Final Net Worth: $${Math.floor(net)}\nYou survived ${state.day} days.`);
+    alert(`Game Over!\nFinal Net Worth: $${Math.floor(net)}\nHeat: ${state.heat}%`);
 }
 
 function startGame() {
     document.getElementById('start-overlay').style.display = 'none';
     generateMarket();
     updateUI();
-    logEvent("Welcome to Stock Wars Tycoon 2026. Trade hard. Survive harder.");
+    updatePriceHistory();
+    logEvent("Welcome to Stock Wars Tycoon 2026. Chaos awaits.", true);
 }
 </script>
 </body>
