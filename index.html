@@ -1,33 +1,26 @@
-<!DOCTYPE html>
+debug this code <!DOCTYPE html>
 <html lang="en">
 <head>
     <title>Stock Wars Trading Game</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <meta name="description" content="Become a market mogul in Stock Wars! Trade stocks, manage your portfolio, and navigate market trends in this retro-styled trading game.">
     <meta name="keywords" content="stock market, trading game, simulation, finance, retro game, online game, portfolio management, investing">
     <meta name="author" content="Your Name">
-
     <meta property="og:title" content="Stock Wars Trading Game">
     <meta property="og:description" content="Become a market mogul in Stock Wars! Trade stocks, manage your portfolio, and navigate market trends in this retro-styled trading game.">
     <meta property="og:url" content="https://your-website-url.com">
     <meta property="og:image" content="https://your-website-url.com/images/thumbnail.png">
     <meta property="og:type" content="website">
-
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Stock Wars Trading Game">
     <meta name="twitter:description" content="Become a market mogul in Stock Wars! Trade stocks, manage your portfolio, and navigate market trends in this retro-styled trading game.">
     <meta name="twitter:image" content="https://your-website-url.com/images/thumbnail.png">
-
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  </head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> </head>
 <body>
-
 </body>
 </html>
-
       <style>
 /* General Styles */
 body {
@@ -39,7 +32,6 @@ body {
     overflow-x: hidden; /* Prevent horizontal scroll on some mobile devices */
     box-sizing: border-box; /* Include padding and border in element size */
 }
-
 /* Game Container */
 .game-container {
     width: 100vw;
@@ -50,7 +42,6 @@ body {
     padding: 4px;
     box-sizing: border-box;
 }
-
 /* Game Area */
 #game-area {
     width: 100%;
@@ -59,7 +50,6 @@ body {
     max-width: 100%; /* Prevent overflow */
     background-color: #111; /* Example background for the game area */
 }
-
 /* Window Styles */
 .window {
     border: 2px inset #aaaaaa;
@@ -69,7 +59,6 @@ body {
     overflow: hidden; /* Keep content within the window */
     box-sizing: border-box;
 }
-
 .window-title {
     background-color: #444444;
     color: #00ff00;
@@ -79,7 +68,6 @@ body {
     text-align: center;
     border-bottom: 1px solid #00ff00;
 }
-
 /* Menu Bar */
 .menu-bar {
     background-color: #222222;
@@ -88,7 +76,6 @@ body {
     display: flex;
     gap: 2px;
 }
-
 .menu-item {
     color: #03d503;
     padding: 2px 8px;
@@ -98,18 +85,15 @@ body {
     font-family: monospace;
     font-size: 10px;
 }
-
 .menu-item:hover {
     background-color: #444444;
 }
-
 /* Tables */
 table {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed; /* Important for consistent table layout */
 }
-
 th, td {
     border: 1px solid #00ff00;
     padding: 2px;
@@ -120,13 +104,11 @@ th, td {
     white-space: nowrap;
     text-overflow: ellipsis;
 }
-
 th {
     background-color: #333333;
     color: #00ff00;
     text-align: left;
 }
-
 /* Player Stats */
 .player-stats {
     display: flex;
@@ -135,14 +117,12 @@ th {
     padding: 4px;
     box-sizing: border-box; /* Include padding in width */
 }
-
 .player-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-size: 12px;
 }
-
 .health-bar-container {
     width: 100%;
     border: 1px solid #00ff00;
@@ -150,23 +130,19 @@ th {
     background-color: #111111;
     overflow: hidden;
 }
-
 .health-bar {
     height: 100%;
     width: 100%; /* Will be set dynamically by JavaScript */
     background: linear-gradient(to right, #ff1e00, #00ff00);
     background-color: #00FF00; /* Fallback color */
 }
-
 /* Portfolio Section */
 .portfolio-section {
     width: 100%;
 }
-
 #portfolio-table th, #portfolio-table td {
     text-align: right; /* Numbers aligned right */
 }
-
 /* Event Content */
 #event-content {
     height: 150px;
@@ -178,7 +154,6 @@ th {
     border: 1px solid #00ff00;
     box-sizing: border-box;
 }
-
 /* Modals */
 .modal {
     display: none;
@@ -191,23 +166,19 @@ th {
     transition: opacity 0.3s ease;
     color: #00ff00;
 }
-
 .modal.show {
     display: block;
     opacity: 1;
 }
-
 .modal .window-title {
     border-bottom: 1px solid #00ff00;
 }
-
 /* Control Panel */
 .control-panel {
     margin-top: 4px;
     display: flex;
     gap: 4px;
 }
-
 /* Inputs, Buttons, Selects */
 button, input, select {
     font-family: monospace;
@@ -219,15 +190,12 @@ button, input, select {
     margin: 2px;
     box-sizing: border-box; /* Consistent sizing */
 }
-
 button:active {
     border: 2px inset #aaaaaa;
 }
-
 input[type="number"] {
     width: 50px;
 }
-
 /* Start Overlay */
 #start-overlay {
     position: fixed;
@@ -238,7 +206,6 @@ input[type="number"] {
     justify-content: center;
     align-items: center;
 }
-
 #start-overlay button {
     font-size: 2em;
     padding: 20px 40px;
@@ -247,7 +214,6 @@ input[type="number"] {
     color: #0f0;
     cursor: pointer;
 }
-
 /* Portfolio Summary */
 .portfolio-summary {
     padding: 5px;
@@ -256,42 +222,35 @@ input[type="number"] {
     background: #111;
     box-sizing: border-box; /* Include padding in width */
 }
-
 /* Stock Price Change Animation */
 .stock-price-change {
     animation: priceChange 1s forwards;
     opacity: 0;
 }
-
 @keyframes priceChange {
     0% {
         transform: translateY(0);
         opacity: 1;
     }
-
     50% {
         transform: translateY(-10px);
         opacity: 0.5;
     }
-
     100% {
         transform: translateY(10px);
         opacity: 0;
     }
 }
-
 /* History Chart */
 #history-chart {
     width: 380px;
     height: 180px;
 }
-
 /* Input Error */
 .input-error {
     border-color: red !important;
     animation: shake 0.3s;
 }
-
 @keyframes shake {
     0% { transform: translateX(0); }
     25% { transform: translateX(-4px); }
@@ -299,22 +258,18 @@ input[type="number"] {
     75% { transform: translateX(-4px); }
     100% { transform: translateX(0); }
 }
-
 /* Media Queries (Mobile Responsiveness) */
 @media (max-width: 767px) {
     .game-container {
         grid-template-columns: 1fr; /* Single column on mobile */
         grid-template-rows: auto auto; /* Adjust rows as needed */
     }
-
     #game-area {
         aspect-ratio: 16/9; /* Or your aspect ratio */
     }
-
 }
       </style>
-    
-
+   
    <body>
       <!-- Start Overlay -->
       <div id="start-overlay">
@@ -402,7 +357,7 @@ input[type="number"] {
          </div>
          <button onclick="closeGameOver()">Close</button>
       </div>
-   
+  
          <!-- Header -->
          <div class="window" style="grid-column: 1 / 3;">
             <div class="window-title"> Stock Wars - Day <span id="current-day">1</span>/30 </div>
@@ -514,12 +469,10 @@ input[type="number"] {
       <audio id="news-sound">
          <source src="news.mp3" type="audio/mpeg">
       </audio>
-
       <!-- JavaScript Code -->
-
       <script>
-        
        
+      
          const gameSettings = {
             difficulty: "normal",
             sound: true,
@@ -580,7 +533,6 @@ input[type="number"] {
          function openModal(id) {
             document.getElementById(id).classList.add("show");
          }
-
          function closeModal(id) {
             document.getElementById(id).classList.remove("show");
          }
@@ -596,7 +548,6 @@ input[type="number"] {
                trendDisplay.textContent = "Neutral";
             }
          }
-
          function generateMarketPrices() {
             generateMarketTrend();
             stocks.forEach(stock => {
@@ -612,29 +563,23 @@ input[type="number"] {
             });
             renderMarket();
          }
-
          function renderMarket() {
   const priceTable = document.getElementById("price-table");
   const itemSelect = document.getElementById("item-select");
-
   // Clear table content (important!)
   priceTable.innerHTML = ""; // Clear the table content first
-
   // Create table header row (using DOM methods)
   const headerRow = priceTable.insertRow();
   headerRow.insertCell().textContent = "Stock";
   headerRow.insertCell().textContent = "Price";
-
   // Populate table with data
   stocks.forEach(stock => {
     const row = priceTable.insertRow();
     const stockCell = row.insertCell();
     const priceCell = row.insertCell();
-
     stockCell.textContent = stock;
     priceCell.textContent = `$${state.marketPrices[stock]}`;
   });
-
   // Populate item select dropdown (more efficient)
   itemSelect.innerHTML = ""; // Clear existing options
   stocks.forEach(stock => {
@@ -646,21 +591,17 @@ input[type="number"] {
 }
          function renderPortfolio() {
   const portfolioTable = document.getElementById("portfolio-table");
-
   // More robust: Clear the table content first
   portfolioTable.innerHTML = "";
-
   // Create the header row (using DOM methods - better practice)
   const headerRow = portfolioTable.insertRow();
   headerRow.insertCell().textContent = "Stock";
   headerRow.insertCell().textContent = "Long";
   headerRow.insertCell().textContent = "Short";
-
   // Populate the table with data
   stocks.forEach(stock => {
     const longQty = state.inventory[stock] || 0;
     const shortQty = state.shortPositions[stock] || 0;
-
     if (longQty || shortQty) {
       const row = portfolioTable.insertRow();
       row.insertCell().textContent = stock;
@@ -678,12 +619,11 @@ input[type="number"] {
             const margin = Math.floor(state.cash * 0.2);
             document.getElementById("margin").innerText = margin;
          }
-
          function logEvent(message) {
             const eventLog = document.getElementById("event-content");
             const timestamp = new Date().toLocaleTimeString();
             eventLog.innerHTML += `
-																			<p>[${timestamp}] ${message}</p>`;
+<p>[${timestamp}] ${message}</p>`;
             eventLog.scrollTop = eventLog.scrollHeight;
             renderPortfolio();
          }
@@ -693,7 +633,6 @@ input[type="number"] {
             el.classList.add("input-error");
             setTimeout(() => el.classList.remove("input-error"), 300);
          }
-
          function buyItem() {
             if (isGameOver) return;
             const quantity = parseInt(document.getElementById("buy-quantity").value);
@@ -715,7 +654,6 @@ input[type="number"] {
             }
             updateUI();
          }
-
          function sellItem() {
             if (isGameOver) return;
             const quantity = parseInt(document.getElementById("sell-quantity").value);
@@ -738,7 +676,6 @@ input[type="number"] {
             audioController.play("sell-sound");
             updateUI();
          }
-
          function shortSell() {
             if (isGameOver) return;
             const quantity = parseInt(document.getElementById("short-quantity").value);
@@ -753,7 +690,6 @@ input[type="number"] {
             audioController.play("short-sound");
             updateUI();
          }
-
          function coverShort() {
             if (isGameOver) return;
             const quantity = parseInt(document.getElementById("cover-quantity").value);
@@ -788,7 +724,6 @@ input[type="number"] {
             logEvent(`Took a $1000 loan (Total repayment: $${amountWithInterest.toFixed(2)}).`);
             updateUI();
          }
-
          function repayLoan() {
             if (isGameOver) return;
             if (state.cash < 1000) {
@@ -812,7 +747,6 @@ input[type="number"] {
             triggerNewsEvent();
             nextTurn();
          }
-
          function triggerNewsEvent() {
             const eventChance = Math.random();
             if (eventChance < 0.15) {
@@ -833,7 +767,6 @@ input[type="number"] {
                logEvent("No major news today.");
             }
          }
-
          function nextTurn() {
             if (isGameOver) return;
             state.day++;
@@ -846,7 +779,6 @@ input[type="number"] {
             logEvent(`--- End of Day ${state.day - 1} Report ---`);
             logEvent(`Cash: $${state.cash} | Debt: $${state.debt} | Health: ${state.health}%`);
          }
-
          function endGame() {
             isGameOver = true;
             const finalScore = state.cash - state.debt;
@@ -857,14 +789,12 @@ input[type="number"] {
             openModal("gameover-modal");
             disableTradingControls();
          }
-
          function disableTradingControls() {
             const controls = ["buy-btn", "sell-btn", "short-btn", "cover-btn", "loan-btn", "repay-btn"];
             controls.forEach(id => {
                document.getElementById(id).disabled = true;
             });
          }
-
          function closeGameOver() {
             closeModal("gameover-modal");
          }
@@ -912,7 +842,6 @@ input[type="number"] {
             });
             openModal("history-window");
          }
-
          function closePriceHistory() {
             closeModal("history-window");
          }
@@ -944,12 +873,10 @@ input[type="number"] {
                });
             }
          }
-
          function saveGame() {
             localStorage.setItem("stockWarsSave", JSON.stringify(state));
             logEvent("Game saved.");
          }
-
          function loadGame() {
             const savedState = localStorage.getItem("stockWarsSave");
             if (savedState) {
@@ -962,7 +889,6 @@ input[type="number"] {
                logEvent("No saved game found.");
             }
          }
-
          function closeFileMenu() {
             closeModal("file-menu");
          }
@@ -971,7 +897,6 @@ input[type="number"] {
             gameSettings.difficulty = level;
             logEvent(`Difficulty set to ${level}.`);
          }
-
          function toggleSound(enabled) {
             gameSettings.sound = enabled;
             logEvent(`Sound effects ${enabled ? "enabled" : "disabled"}.`);
@@ -981,18 +906,15 @@ input[type="number"] {
                audioController.backgroundMusic.play();
             }
          }
-
          function toggleFee(enabled) {
             gameSettings.feeEnabled = enabled;
             logEvent(`Transaction fee ${enabled ? "enabled" : "disabled"}.`);
          }
-
          function updateMusicVolume(volume) {
             gameSettings.musicVolume = parseFloat(volume);
             audioController.setMusicVolume(gameSettings.musicVolume);
             logEvent(`Music volume set to ${gameSettings.musicVolume}.`);
          }
-
          function closeSettingsMenu() {
             closeModal("settings-menu");
          }
